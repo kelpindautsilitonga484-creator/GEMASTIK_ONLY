@@ -10,7 +10,8 @@ class TravelRepository {
       plateNumber: 'BK 7120 KBT',
       origin: 'Medan',
       destination: 'Tarutung',
-      departurePool: 'Pool KBT Simpang Limun, Jl. Sisingamangaraja No. 88, Medan',
+      departurePool:
+          'Pool KBT Simpang Limun, Jl. Sisingamangaraja No. 88, Medan',
       arrivalPool: 'Pool KBT Tarutung, Jl. Sisingamangaraja No. 12, Tarutung',
       departureTime: '07:30',
       arrivalTime: '13:00',
@@ -97,7 +98,13 @@ class TravelRepository {
       price: 80000,
       occupiedSeats: ['3A', '4A'],
       totalSeats: 10,
-      facilities: ['AC VIP', 'Capt Seat', 'USB Charger', 'Air Mineral', 'Door to Door'],
+      facilities: [
+        'AC VIP',
+        'Capt Seat',
+        'USB Charger',
+        'Air Mineral',
+        'Door to Door'
+      ],
       rating: 4.92,
       serviceType: 'Door to Door',
       driverName: 'Bang D. Purba',
@@ -200,7 +207,8 @@ class TravelRepository {
     if (index != -1) {
       final booking = userBookings[index];
       // remove seats from travel
-      booking.travel.occupiedSeats.removeWhere((seat) => booking.selectedSeats.contains(seat));
+      booking.travel.occupiedSeats
+          .removeWhere((seat) => booking.selectedSeats.contains(seat));
       // update status
       userBookings[index] = BookingModel(
         bookingId: booking.bookingId,

@@ -79,12 +79,14 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.directions_bus_rounded),
-              activeIcon: Icon(Icons.directions_bus_rounded, color: Color(0xFF0F52BA)),
+              activeIcon:
+                  Icon(Icons.directions_bus_rounded, color: Color(0xFF0F52BA)),
               label: 'Cari Travel',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.confirmation_number_rounded),
-              activeIcon: Icon(Icons.confirmation_number_rounded, color: Color(0xFF0F52BA)),
+              activeIcon: Icon(Icons.confirmation_number_rounded,
+                  color: Color(0xFF0F52BA)),
               label: 'Tiket Saya',
             ),
             BottomNavigationBarItem(
@@ -102,7 +104,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Profil Penumpang', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Profil Penumpang',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF0F52BA),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -117,8 +120,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 children: [
                   CircleAvatar(
                     radius: 46,
-                    backgroundColor: const Color(0xFF0F52BA).withValues(alpha: 0.15),
-                    child: const Icon(Icons.person, size: 56, color: Color(0xFF0F52BA)),
+                    backgroundColor:
+                        const Color(0xFF0F52BA).withValues(alpha: 0.15),
+                    child: const Icon(Icons.person,
+                        size: 56, color: Color(0xFF0F52BA)),
                   ),
                   Positioned(
                     bottom: 0,
@@ -129,7 +134,8 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                         color: Colors.teal,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(Icons.check, size: 16, color: Colors.white),
+                      child: const Icon(Icons.check,
+                          size: 16, color: Colors.white),
                     ),
                   ),
                 ],
@@ -138,7 +144,10 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             const SizedBox(height: 14),
             const Text(
               'Posman Penumpang',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF0F172A)),
             ),
             const SizedBox(height: 4),
             Text(
@@ -150,32 +159,41 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
             // Profile menu card
             Card(
               elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16)),
               child: Column(
                 children: [
                   ListTile(
-                    leading: const Icon(Icons.badge_outlined, color: Color(0xFF0F52BA)),
+                    leading: const Icon(Icons.badge_outlined,
+                        color: Color(0xFF0F52BA)),
                     title: const Text('Peran Aplikasi'),
                     subtitle: const Text('Frontend Penumpang (K1 - Posman)'),
                     trailing: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade100,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text('K1', style: TextStyle(color: Color(0xFF0F52BA), fontWeight: FontWeight.bold, fontSize: 12)),
+                      child: const Text('K1',
+                          style: TextStyle(
+                              color: Color(0xFF0F52BA),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12)),
                     ),
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: const Icon(Icons.favorite_outline_rounded, color: Colors.redAccent),
+                    leading: const Icon(Icons.favorite_outline_rounded,
+                        color: Colors.redAccent),
                     title: const Text('Rute Favorit'),
                     subtitle: const Text('Medan ↔ Parapat (Danau Toba)'),
                     onTap: () {},
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: const Icon(Icons.notifications_none_rounded, color: Colors.amber),
+                    leading: const Icon(Icons.notifications_none_rounded,
+                        color: Colors.amber),
                     title: const Text('Notifikasi Pemesanan'),
                     subtitle: const Text('Aktif'),
                     onTap: () {},
@@ -193,17 +211,20 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
                 onPressed: () {
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => const LoginScreen()),
                   );
                 },
                 icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
                 label: const Text(
                   'Keluar Akun',
-                  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      color: Colors.redAccent, fontWeight: FontWeight.bold),
                 ),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Colors.redAccent),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ),

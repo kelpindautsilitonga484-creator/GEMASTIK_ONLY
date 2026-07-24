@@ -8,7 +8,8 @@ class BookingModel {
   final List<String> selectedSeats;
   final int totalPrice;
   final String paymentMethod;
-  final String status; // 'Dikonfirmasi', 'Menunggu Pembayaran', 'Selesai', 'Dibatalkan'
+  final String
+      status; // 'Dikonfirmasi', 'Menunggu Pembayaran', 'Selesai', 'Dibatalkan'
   final DateTime bookingDate;
 
   BookingModel({

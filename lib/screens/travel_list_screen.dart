@@ -63,7 +63,8 @@ class _TravelListScreenState extends State<TravelListScreen> {
       if (!matchesQuery) return false;
 
       if (_activeFilter == 'Door to Door') {
-        return t.serviceType == 'Door to Door' || t.facilities.contains('Door to Door');
+        return t.serviceType == 'Door to Door' ||
+            t.facilities.contains('Door to Door');
       } else if (_activeFilter == 'Shuttle Bandara') {
         return t.origin.toLowerCase().contains('kualanamu') ||
             t.destination.toLowerCase().contains('silangit') ||
@@ -85,7 +86,8 @@ class _TravelListScreenState extends State<TravelListScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Daftar Travel Tersedia', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Daftar Travel Tersedia',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF0F52BA),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -104,10 +106,12 @@ class _TravelListScreenState extends State<TravelListScreen> {
                   onChanged: (val) => setState(() => _searchQuery = val),
                   decoration: InputDecoration(
                     hintText: 'Cari asal, tujuan, atau nama travel...',
-                    prefixIcon: const Icon(Icons.search_rounded, color: Color(0xFF0F52BA)),
+                    prefixIcon: const Icon(Icons.search_rounded,
+                        color: Color(0xFF0F52BA)),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, color: Colors.grey),
+                            icon: const Icon(Icons.clear_rounded,
+                                color: Colors.grey),
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
@@ -116,7 +120,8 @@ class _TravelListScreenState extends State<TravelListScreen> {
                         : null,
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(12),
                       borderSide: BorderSide.none,
@@ -147,7 +152,9 @@ class _TravelListScreenState extends State<TravelListScreen> {
                             width: 1.2,
                           ),
                           labelStyle: TextStyle(
-                            color: isSelected ? const Color(0xFF0F52BA) : Colors.white,
+                            color: isSelected
+                                ? const Color(0xFF0F52BA)
+                                : Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
                           ),
@@ -167,16 +174,21 @@ class _TravelListScreenState extends State<TravelListScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.directions_bus_filled_outlined, size: 64, color: Colors.grey.shade400),
+                        Icon(Icons.directions_bus_filled_outlined,
+                            size: 64, color: Colors.grey.shade400),
                         const SizedBox(height: 12),
                         Text(
                           'Jadwal travel tidak ditemukan',
-                          style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Coba gunakan kata kunci pencarian yang lain.',
-                          style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                          style: TextStyle(
+                              fontSize: 13, color: Colors.grey.shade500),
                         ),
                       ],
                     ),
@@ -196,7 +208,8 @@ class _TravelListScreenState extends State<TravelListScreen> {
   }
 
   Widget _buildDetailedTravelCard(BuildContext context, TravelModel travel) {
-    final formattedPrice = 'Rp ${travel.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
+    final formattedPrice =
+        'Rp ${travel.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -218,18 +231,23 @@ class _TravelListScreenState extends State<TravelListScreen> {
                     children: [
                       Text(
                         travel.providerName,
-                        style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                        style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A)),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '${travel.vehicleType} • ${travel.plateNumber}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        style: TextStyle(
+                            fontSize: 12, color: Colors.grey.shade600),
                       ),
                     ],
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.amber.shade50,
                     borderRadius: BorderRadius.circular(20),
@@ -237,11 +255,13 @@ class _TravelListScreenState extends State<TravelListScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: Colors.amber, size: 16),
+                      const Icon(Icons.star_rounded,
+                          color: Colors.amber, size: 16),
                       const SizedBox(width: 4),
                       Text(
                         '${travel.rating}',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 13),
                       ),
                     ],
                   ),
@@ -266,9 +286,15 @@ class _TravelListScreenState extends State<TravelListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(travel.departureTime, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F52BA))),
+                            Text(travel.departureTime,
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0F52BA))),
                             const SizedBox(height: 2),
-                            Text(travel.origin, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            Text(travel.origin,
+                                style: const TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -277,9 +303,15 @@ class _TravelListScreenState extends State<TravelListScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(travel.arrivalTime, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF0F52BA))),
+                            Text(travel.arrivalTime,
+                                style: const TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF0F52BA))),
                             const SizedBox(height: 2),
-                            Text(travel.destination, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                            Text(travel.destination,
+                                style: const TextStyle(
+                                    fontSize: 13, fontWeight: FontWeight.w600)),
                           ],
                         ),
                       ),
@@ -288,12 +320,14 @@ class _TravelListScreenState extends State<TravelListScreen> {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      const Icon(Icons.location_on_outlined, size: 14, color: Colors.redAccent),
+                      const Icon(Icons.location_on_outlined,
+                          size: 14, color: Colors.redAccent),
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
                           'Pool: ${travel.departurePool}',
-                          style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+                          style: TextStyle(
+                              fontSize: 11, color: Colors.grey.shade700),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -311,7 +345,8 @@ class _TravelListScreenState extends State<TravelListScreen> {
               runSpacing: 6,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: Colors.teal.shade50,
                     borderRadius: BorderRadius.circular(6),
@@ -319,19 +354,26 @@ class _TravelListScreenState extends State<TravelListScreen> {
                   ),
                   child: Text(
                     travel.serviceType,
-                    style: TextStyle(fontSize: 11, color: Colors.teal.shade800, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.teal.shade800,
+                        fontWeight: FontWeight.bold),
                   ),
                 ),
                 ...travel.facilities.map((fac) {
                   return Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       fac,
-                      style: TextStyle(fontSize: 11, color: Colors.blue.shade800, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.blue.shade800,
+                          fontWeight: FontWeight.w500),
                     ),
                   );
                 }),
@@ -348,14 +390,19 @@ class _TravelListScreenState extends State<TravelListScreen> {
                   children: [
                     Text(
                       formattedPrice,
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.teal),
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal),
                     ),
                     Text(
                       'Tersedia ${travel.availableSeatsCount} / ${travel.totalSeats} Kursi',
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: travel.availableSeatsCount <= 2 ? Colors.red : Colors.grey.shade600,
+                        color: travel.availableSeatsCount <= 2
+                            ? Colors.red
+                            : Colors.grey.shade600,
                       ),
                     ),
                   ],
@@ -375,12 +422,15 @@ class _TravelListScreenState extends State<TravelListScreen> {
                           );
                         },
                   icon: const Icon(Icons.event_seat_rounded, size: 18),
-                  label: const Text('Pesan Kursi', style: TextStyle(fontWeight: FontWeight.bold)),
+                  label: const Text('Pesan Kursi',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F52BA),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
                 ),
               ],

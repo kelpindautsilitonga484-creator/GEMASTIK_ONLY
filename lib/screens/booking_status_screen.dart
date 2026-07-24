@@ -9,7 +9,8 @@ class BookingStatusScreen extends StatefulWidget {
   State<BookingStatusScreen> createState() => _BookingStatusScreenState();
 }
 
-class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTickerProviderStateMixin {
+class _BookingStatusScreenState extends State<BookingStatusScreen>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
 
   @override
@@ -44,7 +45,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
             Icon(Icons.g_mobiledata_rounded, color: Colors.teal, size: 28),
             Icon(Icons.location_on_rounded, color: Colors.redAccent, size: 24),
             SizedBox(width: 8),
-            Text('Lacak Lokasi Travel (GPS)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            Text('Lacak Lokasi Travel (GPS)',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ],
         ),
         content: Column(
@@ -60,30 +62,45 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(travel.providerName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  Text('${travel.vehicleType} • ${travel.plateNumber}', style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                  Text(travel.providerName,
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text('${travel.vehicleType} • ${travel.plateNumber}',
+                      style:
+                          TextStyle(fontSize: 12, color: Colors.grey.shade700)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.person_pin_rounded, color: Color(0xFF0F52BA), size: 16),
+                      const Icon(Icons.person_pin_rounded,
+                          color: Color(0xFF0F52BA), size: 16),
                       const SizedBox(width: 4),
-                      Text('Pengemudi: ${travel.driverName}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      Text('Pengemudi: ${travel.driverName}',
+                          style: const TextStyle(
+                              fontSize: 12, fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            const Text('Status Posisi Terkini:', style: TextStyle(fontSize: 12, color: Colors.grey, fontWeight: FontWeight.bold)),
+            const Text('Status Posisi Terkini:',
+                style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.bold)),
             const SizedBox(height: 6),
             Row(
               children: const [
-                Icon(Icons.directions_bus_filled_rounded, color: Colors.teal, size: 20),
+                Icon(Icons.directions_bus_filled_rounded,
+                    color: Colors.teal, size: 20),
                 SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     'Jalan Medan - Tebing Tinggi (Km 34)',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A)),
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                        color: Color(0xFF0F172A)),
                   ),
                 ),
               ],
@@ -91,10 +108,12 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
             const SizedBox(height: 4),
             Text(
               'Estimasi waktu penjemputan: 15 - 20 Menit Lagi',
-              style: TextStyle(fontSize: 12, color: Colors.teal.shade800, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.teal.shade800,
+                  fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
-
             Container(
               height: 120,
               width: double.infinity,
@@ -109,9 +128,14 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: const [
-                        Icon(Icons.map_rounded, size: 40, color: Colors.black38),
+                        Icon(Icons.map_rounded,
+                            size: 40, color: Colors.black38),
                         SizedBox(height: 4),
-                        Text('Peta GPS Berjalan (Simulasi Live)', style: TextStyle(fontSize: 11, color: Colors.black54, fontWeight: FontWeight.bold)),
+                        Text('Peta GPS Berjalan (Simulasi Live)',
+                            style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.bold)),
                       ],
                     ),
                   ),
@@ -120,8 +144,10 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                     left: 40,
                     child: Container(
                       padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(color: Colors.teal, shape: BoxShape.circle),
-                      child: const Icon(Icons.directions_bus, color: Colors.white, size: 16),
+                      decoration: const BoxDecoration(
+                          color: Colors.teal, shape: BoxShape.circle),
+                      child: const Icon(Icons.directions_bus,
+                          color: Colors.white, size: 16),
                     ),
                   ),
                 ],
@@ -132,7 +158,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.bold)),
+            child: const Text('Tutup',
+                style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -144,7 +171,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Batalkan Reservasi?', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Batalkan Reservasi?',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         content: Text(
           'Apakah Anda yakin ingin membatalkan pemesanan tiket ${booking.bookingId} (${booking.travel.providerName})?\n\nDana akan dikembalikan sesuai ketentuan pembatalan.',
         ),
@@ -185,12 +213,16 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: Text('Ulasan Perjalanan: ${booking.travel.providerName}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Text('Ulasan Perjalanan: ${booking.travel.providerName}',
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text('Bagaimana pengalaman perjalanan Anda dengan pengemudi?'),
+              const Text(
+                  'Bagaimana pengalaman perjalanan Anda dengan pengemudi?'),
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -198,7 +230,9 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                   final starIndex = index + 1;
                   return IconButton(
                     icon: Icon(
-                      starIndex <= rating ? Icons.star_rounded : Icons.star_outline_rounded,
+                      starIndex <= rating
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
                       color: Colors.amber,
                       size: 32,
                     ),
@@ -215,8 +249,10 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                 controller: reviewController,
                 maxLines: 3,
                 decoration: InputDecoration(
-                  hintText: 'Tulis komentar ulasan Anda (layanan, kenyamanan supir, tepat waktu)...',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  hintText:
+                      'Tulis komentar ulasan Anda (layanan, kenyamanan supir, tepat waktu)...',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ],
@@ -231,7 +267,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
-                    content: Text('Terima kasih! Ulasan Anda berhasil dikirim.'),
+                    content:
+                        Text('Terima kasih! Ulasan Anda berhasil dikirim.'),
                     backgroundColor: Colors.teal,
                   ),
                 );
@@ -250,13 +287,19 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
 
   @override
   Widget build(BuildContext context) {
-    final activeBookings = TravelRepository.userBookings.where((b) => b.status == 'Dikonfirmasi' || b.status == 'Menunggu Pembayaran').toList();
-    final historyBookings = TravelRepository.userBookings.where((b) => b.status == 'Selesai' || b.status == 'Dibatalkan').toList();
+    final activeBookings = TravelRepository.userBookings
+        .where((b) =>
+            b.status == 'Dikonfirmasi' || b.status == 'Menunggu Pembayaran')
+        .toList();
+    final historyBookings = TravelRepository.userBookings
+        .where((b) => b.status == 'Selesai' || b.status == 'Dibatalkan')
+        .toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Status Pemesanan & Tiket', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Status Pemesanan & Tiket',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF0F52BA),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -266,7 +309,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
           indicatorWeight: 3,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white60,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          labelStyle:
+              const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
           tabs: const [
             Tab(text: 'Tiket Aktif'),
             Tab(text: 'Riwayat Pemesanan'),
@@ -283,25 +327,35 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
     );
   }
 
-  Widget _buildBookingList(List<BookingModel> bookings, {required bool isActiveTab}) {
+  Widget _buildBookingList(List<BookingModel> bookings,
+      {required bool isActiveTab}) {
     if (bookings.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              isActiveTab ? Icons.confirmation_number_outlined : Icons.history_rounded,
+              isActiveTab
+                  ? Icons.confirmation_number_outlined
+                  : Icons.history_rounded,
               size: 64,
               color: Colors.grey.shade400,
             ),
             const SizedBox(height: 12),
             Text(
-              isActiveTab ? 'Belum Ada Tiket Aktif' : 'Belum Ada Riwayat Pemesanan',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade600),
+              isActiveTab
+                  ? 'Belum Ada Tiket Aktif'
+                  : 'Belum Ada Riwayat Pemesanan',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey.shade600),
             ),
             const SizedBox(height: 4),
             Text(
-              isActiveTab ? 'Pesan tiket travel Anda di tab "Cari Travel".' : 'Riwayat perjalanan Anda yang lalu akan tampil di sini.',
+              isActiveTab
+                  ? 'Pesan tiket travel Anda di tab "Cari Travel".'
+                  : 'Riwayat perjalanan Anda yang lalu akan tampil di sini.',
               style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
             ),
           ],
@@ -321,7 +375,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
 
   Widget _buildTicketCard(BookingModel booking) {
     final travel = booking.travel;
-    final formattedPrice = 'Rp ${booking.totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
+    final formattedPrice =
+        'Rp ${booking.totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
 
     Color statusBgColor = Colors.teal.shade50;
     Color statusTextColor = Colors.teal;
@@ -355,23 +410,31 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.qr_code_rounded, color: Color(0xFF0F52BA), size: 20),
+                      const Icon(Icons.qr_code_rounded,
+                          color: Color(0xFF0F52BA), size: 20),
                       const SizedBox(width: 6),
                       Text(
                         booking.bookingId,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                            color: Color(0xFF0F172A)),
                       ),
                     ],
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: statusBgColor,
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
                       booking.status,
-                      style: TextStyle(color: statusTextColor, fontWeight: FontWeight.bold, fontSize: 12),
+                      style: TextStyle(
+                          color: statusTextColor,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12),
                     ),
                   ),
                 ],
@@ -387,17 +450,24 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                       children: [
                         Text(
                           travel.providerName,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                         const SizedBox(height: 2),
                         Text(
                           '${travel.origin} ➔ ${travel.destination}',
-                          style: TextStyle(fontSize: 13, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade700,
+                              fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Jam: ${travel.departureTime} WIB • ${travel.vehicleType}',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF0F52BA)),
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F52BA)),
                         ),
                       ],
                     ),
@@ -410,11 +480,18 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                     ),
                     child: Column(
                       children: [
-                        const Text('KURSI', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Color(0xFF0F52BA))),
+                        const Text('KURSI',
+                            style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0F52BA))),
                         const SizedBox(height: 2),
                         Text(
                           booking.selectedSeats.join(','),
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F52BA)),
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF0F52BA)),
                         ),
                       ],
                     ),
@@ -432,38 +509,57 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                       children: [
                         OutlinedButton.icon(
                           onPressed: () => _showLiveTrackingModal(booking),
-                          icon: const Icon(Icons.my_location_rounded, size: 16, color: Colors.teal),
-                          label: const Text('Lacak GPS', style: TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 12)),
+                          icon: const Icon(Icons.my_location_rounded,
+                              size: 16, color: Colors.teal),
+                          label: const Text('Lacak GPS',
+                              style: TextStyle(
+                                  color: Colors.teal,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12)),
                           style: OutlinedButton.styleFrom(
                             side: const BorderSide(color: Colors.teal),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
                           ),
                         ),
                         const SizedBox(width: 8),
                         TextButton(
                           onPressed: () => _confirmCancelBooking(booking),
-                          child: const Text('Batalkan', style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+                          child: const Text('Batalkan',
+                              style: TextStyle(
+                                  color: Colors.redAccent, fontSize: 12)),
                         ),
                       ],
                     ),
                   ] else if (booking.status == 'Selesai') ...[
                     OutlinedButton.icon(
                       onPressed: () => _showRatingDialog(booking),
-                      icon: const Icon(Icons.star_half_rounded, size: 16, color: Colors.amber),
-                      label: const Text('Beri Ulasan', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold, fontSize: 12)),
+                      icon: const Icon(Icons.star_half_rounded,
+                          size: 16, color: Colors.amber),
+                      label: const Text('Beri Ulasan',
+                          style: TextStyle(
+                              color: Colors.amber,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12)),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.amber),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
                   ] else ...[
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Total Biaya', style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                        Text('Total Biaya',
+                            style: TextStyle(
+                                fontSize: 11, color: Colors.grey.shade600)),
                         Text(
                           formattedPrice,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
+                          style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.teal),
                         ),
                       ],
                     ),
@@ -471,11 +567,13 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                   ElevatedButton.icon(
                     onPressed: () => _showETicketDialog(booking),
                     icon: const Icon(Icons.receipt_long_rounded, size: 18),
-                    label: const Text('E-Tiket', style: TextStyle(fontWeight: FontWeight.bold)),
+                    label: const Text('E-Tiket',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0F52BA),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ],
@@ -489,7 +587,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
 
   Widget _buildETicketBottomSheet(BookingModel booking) {
     final travel = booking.travel;
-    final formattedPrice = 'Rp ${booking.totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
+    final formattedPrice =
+        'Rp ${booking.totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
 
     return Container(
       decoration: const BoxDecoration(
@@ -514,20 +613,22 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
               ),
             ),
             const SizedBox(height: 16),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: const [
-                Icon(Icons.confirmation_number_rounded, color: Color(0xFF0F52BA), size: 24),
+                Icon(Icons.confirmation_number_rounded,
+                    color: Color(0xFF0F52BA), size: 24),
                 SizedBox(width: 8),
                 Text(
                   'E-TIKET RESERVASI TRAVEL',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                  style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.5),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -550,11 +651,15 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.qr_code_2_rounded, size: 90, color: Color(0xFF0F52BA)),
+                          const Icon(Icons.qr_code_2_rounded,
+                              size: 90, color: Color(0xFF0F52BA)),
                           const SizedBox(height: 4),
                           Text(
                             booking.bookingId,
-                            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                            style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5),
                           ),
                         ],
                       ),
@@ -564,35 +669,40 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                   const Text(
                     'Tunjukkan QR Code ini kepada pengemudi travel saat penjemputan.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 11, color: Colors.black87, fontWeight: FontWeight.w500),
+                    style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.black87,
+                        fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Menghubungi Supir ${travel.driverName} (${travel.driverPhone})...'),
+                      content: Text(
+                          'Menghubungi Supir ${travel.driverName} (${travel.driverPhone})...'),
                       backgroundColor: Colors.teal,
                     ),
                   );
                 },
-                icon: const Icon(Icons.phone_in_talk_rounded, color: Colors.white),
-                label: Text('Hubungi Supir: ${travel.driverName} (${travel.driverPhone})'),
+                icon: const Icon(Icons.phone_in_talk_rounded,
+                    color: Colors.white),
+                label: Text(
+                    'Hubungi Supir: ${travel.driverName} (${travel.driverPhone})'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
                 ),
               ),
             ),
             const SizedBox(height: 16),
-
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
@@ -603,28 +713,33 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                 children: [
                   _buildInfoRow('Operator Travel', travel.providerName),
                   const Divider(height: 14),
-                  _buildInfoRow('Armada & Nopol', '${travel.vehicleType} (${travel.plateNumber})'),
+                  _buildInfoRow('Armada & Nopol',
+                      '${travel.vehicleType} (${travel.plateNumber})'),
                   const Divider(height: 14),
-                  _buildInfoRow('Pengemudi / Supir', '${travel.driverName} (${travel.driverPhone})'),
+                  _buildInfoRow('Pengemudi / Supir',
+                      '${travel.driverName} (${travel.driverPhone})'),
                   const Divider(height: 14),
-                  _buildInfoRow('Rute', '${travel.origin} ➔ ${travel.destination}'),
+                  _buildInfoRow(
+                      'Rute', '${travel.origin} ➔ ${travel.destination}'),
                   const Divider(height: 14),
                   _buildInfoRow('Pool Penjemputan', travel.departurePool),
                   const Divider(height: 14),
-                  _buildInfoRow('Jam Keberangkatan', '${travel.departureTime} WIB'),
+                  _buildInfoRow(
+                      'Jam Keberangkatan', '${travel.departureTime} WIB'),
                   const Divider(height: 14),
-                  _buildInfoRow('Nomor Kursi', booking.selectedSeats.join(', ')),
+                  _buildInfoRow(
+                      'Nomor Kursi', booking.selectedSeats.join(', ')),
                   const Divider(height: 14),
                   _buildInfoRow('Nama Penumpang', booking.passengerName),
                   const Divider(height: 14),
                   _buildInfoRow('Metode Bayar', booking.paymentMethod),
                   const Divider(height: 14),
-                  _buildInfoRow('Total Biaya', formattedPrice, isBold: true, color: Colors.teal),
+                  _buildInfoRow('Total Biaya', formattedPrice,
+                      isBold: true, color: Colors.teal),
                 ],
               ),
             ),
             const SizedBox(height: 20),
-
             Row(
               children: [
                 Expanded(
@@ -635,7 +750,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                     icon: const Icon(Icons.close),
                     label: const Text('Tutup'),
                     style: OutlinedButton.styleFrom(
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ),
@@ -645,7 +761,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('E-Tiket berhasil diunduh ke galeri ponsel!'),
+                          content: Text(
+                              'E-Tiket berhasil diunduh ke galeri ponsel!'),
                           backgroundColor: Colors.teal,
                         ),
                       );
@@ -655,7 +772,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF0F52BA),
                       foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
                 ),
@@ -668,11 +786,13 @@ class _BookingStatusScreenState extends State<BookingStatusScreen> with SingleTi
     );
   }
 
-  Widget _buildInfoRow(String label, String value, {bool isBold = false, Color? color}) {
+  Widget _buildInfoRow(String label, String value,
+      {bool isBold = false, Color? color}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+        Text(label,
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
         Flexible(
           child: Text(
             value,

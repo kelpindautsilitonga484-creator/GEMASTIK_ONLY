@@ -1,7 +1,8 @@
 class TravelModel {
   final String id;
   final String providerName;
-  final String vehicleType; // e.g., Toyota HiAce Premio, Isuzu Elf, Mitsubishi L300
+  final String
+      vehicleType; // e.g., Toyota HiAce Premio, Isuzu Elf, Mitsubishi L300
   final String plateNumber;
   final String origin;
   final String destination;

@@ -10,7 +10,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController(text: 'penumpang@traveltrack.com');
+  final _emailController =
+      TextEditingController(text: 'penumpang@traveltrack.com');
   final _passwordController = TextEditingController(text: '123456');
   bool _isPasswordObscured = true;
   bool _isLoading = false;
@@ -52,7 +53,8 @@ class _LoginScreenState extends State<LoginScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -90,7 +92,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.blue.shade50,
                     borderRadius: BorderRadius.circular(20),
@@ -99,7 +102,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: const [
-                      Icon(Icons.person_rounded, size: 14, color: Color(0xFF0F52BA)),
+                      Icon(Icons.person_rounded,
+                          size: 14, color: Color(0xFF0F52BA)),
                       SizedBox(width: 4),
                       Text(
                         'Portal Penumpang (Posman - K1)',
@@ -157,7 +161,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().isEmpty) {
@@ -174,7 +179,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             obscureText: _isPasswordObscured,
                             decoration: InputDecoration(
                               labelText: 'Kata Sandi',
-                              prefixIcon: const Icon(Icons.lock_outline_rounded),
+                              prefixIcon:
+                                  const Icon(Icons.lock_outline_rounded),
                               suffixIcon: IconButton(
                                 icon: Icon(
                                   _isPasswordObscured
@@ -190,7 +196,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
                             ),
                             validator: (value) {
                               if (value == null || value.isEmpty) {
@@ -208,7 +215,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Fitur Lupa Password: Kode OTP dikirim ke email demo.'),
+                                    content: Text(
+                                        'Fitur Lupa Password: Kode OTP dikirim ke email demo.'),
                                   ),
                                 );
                               },
@@ -269,13 +277,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       'Belum punya akun? ',
-                      style: TextStyle(color: Colors.grey.shade700, fontSize: 14),
+                      style:
+                          TextStyle(color: Colors.grey.shade700, fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: () {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                            content: Text('Form Pendaftaran Akun Penumpang Baru.'),
+                            content:
+                                Text('Form Pendaftaran Akun Penumpang Baru.'),
                           ),
                         );
                       },

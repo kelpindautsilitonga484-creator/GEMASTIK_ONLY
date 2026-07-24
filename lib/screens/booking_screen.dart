@@ -21,8 +21,10 @@ class _BookingScreenState extends State<BookingScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController(text: 'Posman Penumpang');
   final _phoneController = TextEditingController(text: '081234567890');
-  final _pickupAddressController = TextEditingController(text: 'Jl. Dr. Mansyur No. 120, Padang Bulan, Medan');
-  final _notesController = TextEditingController(text: 'Penjemputan tepat waktu di depan gerbang utama');
+  final _pickupAddressController = TextEditingController(
+      text: 'Jl. Dr. Mansyur No. 120, Padang Bulan, Medan');
+  final _notesController = TextEditingController(
+      text: 'Penjemputan tepat waktu di depan gerbang utama');
 
   final List<String> _selectedSeats = [];
   String _selectedPaymentMethod = 'QRIS Instant';
@@ -72,9 +74,11 @@ class _BookingScreenState extends State<BookingScreen> {
         _isSubmitting = true;
       });
 
-      final bookingId = 'TTR-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().day.toString().padLeft(2, '0')}-${(10 + TravelRepository.userBookings.length + 1)}';
+      final bookingId =
+          'TTR-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().day.toString().padLeft(2, '0')}-${(10 + TravelRepository.userBookings.length + 1)}';
       final extraCost = _serviceTypeOption == 'Door to Door' ? 15000 : 0;
-      final totalPrice = (widget.travel.price + extraCost) * _selectedSeats.length;
+      final totalPrice =
+          (widget.travel.price + extraCost) * _selectedSeats.length;
 
       final newBooking = BookingModel(
         bookingId: bookingId,
@@ -101,7 +105,8 @@ class _BookingScreenState extends State<BookingScreen> {
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             title: Column(
               children: const [
                 Icon(Icons.check_circle_rounded, color: Colors.teal, size: 56),
@@ -119,7 +124,10 @@ class _BookingScreenState extends State<BookingScreen> {
                 Text(
                   'Kode Booking Anda: $bookingId',
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F52BA), fontSize: 15),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F52BA),
+                      fontSize: 15),
                 ),
                 const SizedBox(height: 8),
                 Text(
@@ -136,14 +144,17 @@ class _BookingScreenState extends State<BookingScreen> {
                   onPressed: () {
                     Navigator.pop(context); // Close dialog
                     Navigator.pop(context); // Close booking screen
-                    widget.onBookingCompleted(); // Navigate to Ticket Status tab
+                    widget
+                        .onBookingCompleted(); // Navigate to Ticket Status tab
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F52BA),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text('LIHAT E-TIKET SAYA', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('LIHAT E-TIKET SAYA',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -157,12 +168,14 @@ class _BookingScreenState extends State<BookingScreen> {
   Widget build(BuildContext context) {
     final travel = widget.travel;
     final extraCost = _serviceTypeOption == 'Door to Door' ? 15000 : 0;
-    final totalPrice = (travel.price + extraCost) * (_selectedSeats.isEmpty ? 1 : _selectedSeats.length);
+    final totalPrice = (travel.price + extraCost) *
+        (_selectedSeats.isEmpty ? 1 : _selectedSeats.length);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Pilih Kursi & Booking', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Pilih Kursi & Booking',
+            style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF0F52BA),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -177,7 +190,8 @@ class _BookingScreenState extends State<BookingScreen> {
               // Travel Summary Card
               Card(
                 elevation: 2,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
@@ -187,10 +201,12 @@ class _BookingScreenState extends State<BookingScreen> {
                           Container(
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF0F52BA).withValues(alpha: 0.1),
+                              color: const Color(0xFF0F52BA)
+                                  .withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            child: const Icon(Icons.directions_bus_rounded, color: Color(0xFF0F52BA), size: 28),
+                            child: const Icon(Icons.directions_bus_rounded,
+                                color: Color(0xFF0F52BA), size: 28),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -199,16 +215,23 @@ class _BookingScreenState extends State<BookingScreen> {
                               children: [
                                 Text(
                                   travel.providerName,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16),
                                 ),
                                 const SizedBox(height: 2),
                                 Text(
                                   '${travel.origin} ➔ ${travel.destination}',
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF0F52BA)),
+                                  style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: Color(0xFF0F52BA)),
                                 ),
                                 Text(
                                   'Jam: ${travel.departureTime} WIB • ${travel.vehicleType} (${travel.plateNumber})',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                  style: TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey.shade600),
                                 ),
                               ],
                             ),
@@ -218,12 +241,16 @@ class _BookingScreenState extends State<BookingScreen> {
                       const Divider(height: 20),
                       Row(
                         children: [
-                          const Icon(Icons.pin_drop_rounded, size: 16, color: Colors.redAccent),
+                          const Icon(Icons.pin_drop_rounded,
+                              size: 16, color: Colors.redAccent),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               'Pool Asal: ${travel.departurePool}',
-                              style: TextStyle(fontSize: 11, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                              style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade700,
+                                  fontWeight: FontWeight.w500),
                             ),
                           ),
                         ],
@@ -237,7 +264,10 @@ class _BookingScreenState extends State<BookingScreen> {
               // Service Type Selector (Pool to Pool vs Door to Door)
               const Text(
                 'Layanan Penjemputan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A)),
               ),
               const SizedBox(height: 8),
               Row(
@@ -248,12 +278,15 @@ class _BookingScreenState extends State<BookingScreen> {
                       selected: _serviceTypeOption == 'Pool to Pool',
                       selectedColor: const Color(0xFF0F52BA),
                       labelStyle: TextStyle(
-                        color: _serviceTypeOption == 'Pool to Pool' ? Colors.white : Colors.black87,
+                        color: _serviceTypeOption == 'Pool to Pool'
+                            ? Colors.white
+                            : Colors.black87,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
                       onSelected: (selected) {
-                        if (selected) setState(() => _serviceTypeOption = 'Pool to Pool');
+                        if (selected)
+                          setState(() => _serviceTypeOption = 'Pool to Pool');
                       },
                     ),
                   ),
@@ -264,12 +297,15 @@ class _BookingScreenState extends State<BookingScreen> {
                       selected: _serviceTypeOption == 'Door to Door',
                       selectedColor: Colors.teal,
                       labelStyle: TextStyle(
-                        color: _serviceTypeOption == 'Door to Door' ? Colors.white : Colors.black87,
+                        color: _serviceTypeOption == 'Door to Door'
+                            ? Colors.white
+                            : Colors.black87,
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
                       onSelected: (selected) {
-                        if (selected) setState(() => _serviceTypeOption = 'Door to Door');
+                        if (selected)
+                          setState(() => _serviceTypeOption = 'Door to Door');
                       },
                     ),
                   ),
@@ -280,7 +316,10 @@ class _BookingScreenState extends State<BookingScreen> {
               // Interactive Seat Selection Grid
               const Text(
                 'Denah & Pemilihan Kursi Armada',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A)),
               ),
               const SizedBox(height: 4),
               Text(
@@ -297,14 +336,18 @@ class _BookingScreenState extends State<BookingScreen> {
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(color: Colors.grey.shade300),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
+                    BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2)),
                   ],
                 ),
                 child: Column(
                   children: [
                     // Front vehicle dashboard indicator
                     Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 8, horizontal: 16),
                       decoration: BoxDecoration(
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(8),
@@ -314,12 +357,18 @@ class _BookingScreenState extends State<BookingScreen> {
                         children: [
                           Row(
                             children: [
-                              const Icon(Icons.drive_eta_rounded, size: 18, color: Colors.black54),
+                              const Icon(Icons.drive_eta_rounded,
+                                  size: 18, color: Colors.black54),
                               const SizedBox(width: 6),
-                              Text('Pengemudi: ${travel.driverName}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black87)),
+                              Text('Pengemudi: ${travel.driverName}',
+                                  style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.black87)),
                             ],
                           ),
-                          const Icon(Icons.airline_seat_recline_extra_rounded, color: Colors.indigo, size: 20),
+                          const Icon(Icons.airline_seat_recline_extra_rounded,
+                              color: Colors.indigo, size: 20),
                         ],
                       ),
                     ),
@@ -332,7 +381,8 @@ class _BookingScreenState extends State<BookingScreen> {
                       children: [
                         // Left Column (Seats A)
                         Column(
-                          children: ['1A', '2A', '3A', '4A', '5A'].map((seatCode) {
+                          children:
+                              ['1A', '2A', '3A', '4A', '5A'].map((seatCode) {
                             return _buildSeatItem(seatCode);
                           }).toList(),
                         ),
@@ -340,11 +390,17 @@ class _BookingScreenState extends State<BookingScreen> {
                         Container(
                           width: 24,
                           alignment: Alignment.center,
-                          child: const Text('LORONG', style: TextStyle(fontSize: 9, color: Colors.grey, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                          child: const Text('LORONG',
+                              style: TextStyle(
+                                  fontSize: 9,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5)),
                         ),
                         // Right Column (Seats B)
                         Column(
-                          children: ['1B', '2B', '3B', '4B', '5B'].map((seatCode) {
+                          children:
+                              ['1B', '2B', '3B', '4B', '5B'].map((seatCode) {
                             return _buildSeatItem(seatCode);
                           }).toList(),
                         ),
@@ -356,8 +412,11 @@ class _BookingScreenState extends State<BookingScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        _buildLegendItem(Colors.grey.shade300, Colors.grey.shade700, 'Terisi'),
-                        _buildLegendItem(Colors.white, const Color(0xFF0F52BA), 'Tersedia', hasBorder: true),
+                        _buildLegendItem(Colors.grey.shade300,
+                            Colors.grey.shade700, 'Terisi'),
+                        _buildLegendItem(
+                            Colors.white, const Color(0xFF0F52BA), 'Tersedia',
+                            hasBorder: true),
                         _buildLegendItem(Colors.teal, Colors.white, 'Dipilih'),
                       ],
                     ),
@@ -369,7 +428,10 @@ class _BookingScreenState extends State<BookingScreen> {
               // Passenger Details Form
               const Text(
                 'Data Pemesan & Penjemputan',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A)),
               ),
               const SizedBox(height: 10),
 
@@ -380,9 +442,12 @@ class _BookingScreenState extends State<BookingScreen> {
                   prefixIcon: const Icon(Icons.person_outline),
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Nama wajib diisi' : null,
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? 'Nama wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 12),
 
@@ -394,9 +459,12 @@ class _BookingScreenState extends State<BookingScreen> {
                   prefixIcon: const Icon(Icons.phone_android_outlined),
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'No HP wajib diisi' : null,
+                validator: (val) => val == null || val.trim().isEmpty
+                    ? 'No HP wajib diisi'
+                    : null,
               ),
               const SizedBox(height: 12),
 
@@ -407,12 +475,16 @@ class _BookingScreenState extends State<BookingScreen> {
                   decoration: InputDecoration(
                     labelText: 'Alamat Lengkap Penjemputan (Door-to-Door)',
                     hintText: 'Nama jalan, no rumah, patokan...',
-                    prefixIcon: const Icon(Icons.home_work_outlined, color: Colors.teal),
+                    prefixIcon: const Icon(Icons.home_work_outlined,
+                        color: Colors.teal),
                     filled: true,
                     fillColor: Colors.teal.shade50.withValues(alpha: 0.3),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12)),
                   ),
-                  validator: (val) => val == null || val.trim().isEmpty ? 'Alamat penjemputan wajib diisi' : null,
+                  validator: (val) => val == null || val.trim().isEmpty
+                      ? 'Alamat penjemputan wajib diisi'
+                      : null,
                 ),
                 const SizedBox(height: 12),
               ],
@@ -424,7 +496,8 @@ class _BookingScreenState extends State<BookingScreen> {
                   prefixIcon: const Icon(Icons.note_alt_outlined),
                   filled: true,
                   fillColor: Colors.white,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12)),
                 ),
               ),
               const SizedBox(height: 24),
@@ -432,7 +505,10 @@ class _BookingScreenState extends State<BookingScreen> {
               // Payment Method Selection
               const Text(
                 'Metode Pembayaran',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F172A)),
               ),
               const SizedBox(height: 10),
 
@@ -452,12 +528,15 @@ class _BookingScreenState extends State<BookingScreen> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                         side: BorderSide(
-                          color: isSelected ? const Color(0xFF0F52BA) : Colors.grey.shade300,
+                          color: isSelected
+                              ? const Color(0xFF0F52BA)
+                              : Colors.grey.shade300,
                           width: isSelected ? 2 : 1,
                         ),
                       ),
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         child: Row(
                           children: [
                             Icon(
@@ -469,11 +548,17 @@ class _BookingScreenState extends State<BookingScreen> {
                               color: const Color(0xFF0F52BA),
                             ),
                             const SizedBox(width: 12),
-                            Text(method, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                            Text(method,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600, fontSize: 14)),
                             const Spacer(),
                             Icon(
-                              isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                              color: isSelected ? const Color(0xFF0F52BA) : Colors.grey,
+                              isSelected
+                                  ? Icons.radio_button_checked
+                                  : Icons.radio_button_off,
+                              color: isSelected
+                                  ? const Color(0xFF0F52BA)
+                                  : Colors.grey,
                             ),
                           ],
                         ),
@@ -491,7 +576,10 @@ class _BookingScreenState extends State<BookingScreen> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
-                    BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 10, offset: const Offset(0, -2)),
+                    BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 10,
+                        offset: const Offset(0, -2)),
                   ],
                 ),
                 child: Column(
@@ -504,25 +592,36 @@ class _BookingScreenState extends State<BookingScreen> {
                           children: [
                             Text(
                               'Total Biaya (${_selectedSeats.length} Kursi)',
-                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                  fontSize: 12, color: Colors.grey.shade600),
                             ),
                             Text(
                               'Rp ${totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.teal),
+                              style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.teal),
                             ),
                           ],
                         ),
                         _selectedSeats.isNotEmpty
                             ? Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                decoration: BoxDecoration(color: Colors.teal.shade50, borderRadius: BorderRadius.circular(8)),
-                                child: Text('Kursi: ${_selectedSeats.join(', ')}', style: const TextStyle(color: Colors.teal, fontWeight: FontWeight.bold, fontSize: 12)),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                    color: Colors.teal.shade50,
+                                    borderRadius: BorderRadius.circular(8)),
+                                child: Text(
+                                    'Kursi: ${_selectedSeats.join(', ')}',
+                                    style: const TextStyle(
+                                        color: Colors.teal,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12)),
                               )
                             : Container(),
                       ],
                     ),
                     const SizedBox(height: 14),
-
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -531,12 +630,18 @@ class _BookingScreenState extends State<BookingScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF0F52BA),
                           foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12)),
                           elevation: 2,
                         ),
                         child: _isSubmitting
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('KONFIRMASI & BAYAR', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.5)),
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
+                            : const Text('KONFIRMASI & BAYAR',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    letterSpacing: 0.5)),
                       ),
                     ),
                   ],
@@ -582,7 +687,10 @@ class _BookingScreenState extends State<BookingScreen> {
             border: border,
             boxShadow: isSelected
                 ? [
-                    BoxShadow(color: Colors.teal.withValues(alpha: 0.4), blurRadius: 8, offset: const Offset(0, 4)),
+                    BoxShadow(
+                        color: Colors.teal.withValues(alpha: 0.4),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4)),
                   ]
                 : [],
           ),
@@ -614,7 +722,8 @@ class _BookingScreenState extends State<BookingScreen> {
     );
   }
 
-  Widget _buildLegendItem(Color bgColor, Color textColor, String label, {bool hasBorder = false}) {
+  Widget _buildLegendItem(Color bgColor, Color textColor, String label,
+      {bool hasBorder = false}) {
     return Row(
       children: [
         Container(
@@ -627,7 +736,8 @@ class _BookingScreenState extends State<BookingScreen> {
           ),
         ),
         const SizedBox(width: 6),
-        Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        Text(label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
       ],
     );
   }

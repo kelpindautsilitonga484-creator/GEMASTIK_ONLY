@@ -84,7 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: const [
                           Text(
                             'Selamat Datang,',
-                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                            style:
+                                TextStyle(color: Colors.white70, fontSize: 14),
                           ),
                           Text(
                             'Posman Penumpang 👋',
@@ -102,7 +103,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
-                          icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+                          icon: const Icon(Icons.notifications_none_rounded,
+                              color: Colors.white),
                           onPressed: widget.onNavigateToBookings,
                           tooltip: 'Tiket Saya',
                         ),
@@ -125,7 +127,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         children: [
                           Row(
                             children: const [
-                              Icon(Icons.directions_bus_outlined, color: Color(0xFF0F52BA), size: 20),
+                              Icon(Icons.directions_bus_outlined,
+                                  color: Color(0xFF0F52BA), size: 20),
                               SizedBox(width: 8),
                               Text(
                                 'Cari Perjalanan Travel',
@@ -149,23 +152,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                value: _cities.contains(_selectedOrigin) ? _selectedOrigin : _cities.first,
+                                value: _cities.contains(_selectedOrigin)
+                                    ? _selectedOrigin
+                                    : _cities.first,
                                 isExpanded: true,
-                                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF0F52BA)),
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: Color(0xFF0F52BA)),
                                 items: _cities.map((city) {
                                   return DropdownMenuItem(
                                     value: city,
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.location_on_outlined, color: Colors.teal, size: 18),
+                                        const Icon(Icons.location_on_outlined,
+                                            color: Colors.teal, size: 18),
                                         const SizedBox(width: 8),
-                                        Text('Dari: $city', style: const TextStyle(fontWeight: FontWeight.w600)),
+                                        Text('Dari: $city',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600)),
                                       ],
                                     ),
                                   );
                                 }).toList(),
                                 onChanged: (val) {
-                                  if (val != null) setState(() => _selectedOrigin = val);
+                                  if (val != null)
+                                    setState(() => _selectedOrigin = val);
                                 },
                               ),
                             ),
@@ -182,23 +193,31 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
-                                value: _cities.contains(_selectedDestination) ? _selectedDestination : _cities[1],
+                                value: _cities.contains(_selectedDestination)
+                                    ? _selectedDestination
+                                    : _cities[1],
                                 isExpanded: true,
-                                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF0F52BA)),
+                                icon: const Icon(
+                                    Icons.keyboard_arrow_down_rounded,
+                                    color: Color(0xFF0F52BA)),
                                 items: _cities.map((city) {
                                   return DropdownMenuItem(
                                     value: city,
                                     child: Row(
                                       children: [
-                                        const Icon(Icons.pin_drop_outlined, color: Colors.orange, size: 18),
+                                        const Icon(Icons.pin_drop_outlined,
+                                            color: Colors.orange, size: 18),
                                         const SizedBox(width: 8),
-                                        Text('Ke: $city', style: const TextStyle(fontWeight: FontWeight.w600)),
+                                        Text('Ke: $city',
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.w600)),
                                       ],
                                     ),
                                   );
                                 }).toList(),
                                 onChanged: (val) {
-                                  if (val != null) setState(() => _selectedDestination = val);
+                                  if (val != null)
+                                    setState(() => _selectedDestination = val);
                                 },
                               ),
                             ),
@@ -210,7 +229,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             onTap: _pickDate,
                             borderRadius: BorderRadius.circular(12),
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 14),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade100,
                                 borderRadius: BorderRadius.circular(12),
@@ -218,16 +238,22 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.calendar_today_rounded, color: Color(0xFF0F52BA), size: 18),
+                                  const Icon(Icons.calendar_today_rounded,
+                                      color: Color(0xFF0F52BA), size: 18),
                                   const SizedBox(width: 10),
                                   Text(
                                     '${_selectedDate.day}/${_selectedDate.month}/${_selectedDate.year}',
-                                    style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14),
                                   ),
                                   const Spacer(),
                                   Text(
                                     'Ubah',
-                                    style: TextStyle(color: Colors.blue.shade700, fontWeight: FontWeight.bold, fontSize: 12),
+                                    style: TextStyle(
+                                        color: Colors.blue.shade700,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12),
                                   ),
                                 ],
                               ),
@@ -242,18 +268,24 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: ElevatedButton.icon(
                               onPressed: () {
                                 if (widget.onNavigateToTravelList != null) {
-                                  widget.onNavigateToTravelList!(_selectedDestination);
+                                  widget.onNavigateToTravelList!(
+                                      _selectedDestination);
                                 }
                               },
-                              icon: const Icon(Icons.search_rounded, color: Colors.white),
+                              icon: const Icon(Icons.search_rounded,
+                                  color: Colors.white),
                               label: const Text(
                                 'CARI JADWAL TRAVEL',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.5),
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 15,
+                                    letterSpacing: 0.5),
                               ),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF0F52BA),
                                 foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12)),
                                 elevation: 2,
                               ),
                             ),
@@ -273,15 +305,18 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: _buildFeatureBadge(Icons.event_seat_rounded, 'Pilih Kursi', 'Bebas Pilih No Kursi'),
+                    child: _buildFeatureBadge(Icons.event_seat_rounded,
+                        'Pilih Kursi', 'Bebas Pilih No Kursi'),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _buildFeatureBadge(Icons.qr_code_scanner_rounded, 'QRIS Instant', 'Bayar Cepat & Aman'),
+                    child: _buildFeatureBadge(Icons.qr_code_scanner_rounded,
+                        'QRIS Instant', 'Bayar Cepat & Aman'),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
-                    child: _buildFeatureBadge(Icons.verified_rounded, 'Pasti Berangkat', 'Garansi Layanan'),
+                    child: _buildFeatureBadge(Icons.verified_rounded,
+                        'Pasti Berangkat', 'Garansi Layanan'),
                   ),
                 ],
               ),
@@ -296,7 +331,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Text(
                     'Jadwal Travel Populer',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A)),
                   ),
                   TextButton(
                     onPressed: () {
@@ -304,7 +342,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         widget.onNavigateToTravelList!('');
                       }
                     },
-                    child: const Text('Lihat Semua', style: TextStyle(color: Color(0xFF0F52BA), fontWeight: FontWeight.bold)),
+                    child: const Text('Lihat Semua',
+                        style: TextStyle(
+                            color: Color(0xFF0F52BA),
+                            fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
@@ -383,16 +424,21 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Row(
                   children: [
-                    const Icon(Icons.directions_bus_filled_rounded, color: Color(0xFF0F52BA), size: 20),
+                    const Icon(Icons.directions_bus_filled_rounded,
+                        color: Color(0xFF0F52BA), size: 20),
                     const SizedBox(width: 8),
                     Text(
                       travel.providerName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF0F172A)),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color(0xFF0F172A)),
                     ),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
                     color: Colors.amber.shade50,
                     borderRadius: BorderRadius.circular(8),
@@ -400,11 +446,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.star_rounded, color: Colors.amber, size: 14),
+                      const Icon(Icons.star_rounded,
+                          color: Colors.amber, size: 14),
                       const SizedBox(width: 4),
                       Text(
                         '${travel.rating}',
-                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.black87),
+                        style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87),
                       ),
                     ],
                   ),
@@ -420,23 +470,34 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(travel.departureTime, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text(travel.origin, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                      Text(travel.departureTime,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(travel.origin,
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade600)),
                     ],
                   ),
                 ),
                 Column(
                   children: [
-                    const Icon(Icons.arrow_forward_rounded, color: Color(0xFF0F52BA), size: 20),
-                    Text(travel.vehicleType, style: TextStyle(fontSize: 10, color: Colors.grey.shade500)),
+                    const Icon(Icons.arrow_forward_rounded,
+                        color: Color(0xFF0F52BA), size: 20),
+                    Text(travel.vehicleType,
+                        style: TextStyle(
+                            fontSize: 10, color: Colors.grey.shade500)),
                   ],
                 ),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(travel.arrivalTime, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text(travel.destination, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                      Text(travel.arrivalTime,
+                          style: const TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
+                      Text(travel.destination,
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.grey.shade600)),
                     ],
                   ),
                 ),
@@ -453,11 +514,19 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       'Rp ${travel.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.teal),
+                      style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.teal),
                     ),
                     Text(
                       'Sisa ${travel.availableSeatsCount} Kursi',
-                      style: TextStyle(fontSize: 11, color: travel.availableSeatsCount <= 3 ? Colors.redAccent : Colors.grey.shade600, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: travel.availableSeatsCount <= 3
+                              ? Colors.redAccent
+                              : Colors.grey.shade600,
+                          fontWeight: FontWeight.w600),
                     ),
                   ],
                 ),
@@ -476,9 +545,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF0F52BA),
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
                   ),
-                  child: const Text('Pesan Kursi', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: const Text('Pesan Kursi',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
