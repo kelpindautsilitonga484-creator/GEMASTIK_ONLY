@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/dummy_data.dart';
 import '../models/travel_model.dart';
 import 'booking_screen.dart';
+import 'travel_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Function(String search)? onNavigateToTravelList;
@@ -415,147 +416,161 @@ class _HomeScreenState extends State<HomeScreen> {
       elevation: 2,
       shadowColor: Colors.black.withValues(alpha: 0.06),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Provider & Rating
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.directions_bus_filled_rounded,
-                        color: Color(0xFF0F52BA), size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      travel.providerName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Color(0xFF0F172A)),
-                    ),
-                  ],
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.amber.shade50,
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.amber.shade200),
-                  ),
-                  child: Row(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TravelDetailScreen(
+                travel: travel,
+                onBookingSuccess: widget.onNavigateToBookings,
+              ),
+            ),
+          );
+        },
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Provider & Rating
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
                     children: [
-                      const Icon(Icons.star_rounded,
-                          color: Colors.amber, size: 14),
-                      const SizedBox(width: 4),
+                      const Icon(Icons.directions_bus_filled_rounded,
+                          color: Color(0xFF0F52BA), size: 20),
+                      const SizedBox(width: 8),
                       Text(
-                        '${travel.rating}',
+                        travel.providerName,
                         style: const TextStyle(
-                            fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black87),
+                            fontSize: 15,
+                            color: Color(0xFF0F172A)),
                       ),
                     ],
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.amber.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.amber.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.star_rounded,
+                            color: Colors.amber, size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${travel.rating}',
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
 
-            // Route & Time Info
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
+              // Route & Time Info
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(travel.departureTime,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(travel.origin,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade600)),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    children: [
+                      const Icon(Icons.arrow_forward_rounded,
+                          color: Color(0xFF0F52BA), size: 20),
+                      Text(travel.vehicleType,
+                          style: TextStyle(
+                              fontSize: 10, color: Colors.grey.shade500)),
+                    ],
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(travel.arrivalTime,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        Text(travel.destination,
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey.shade600)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const Divider(height: 24),
+
+              // Price & Book Action
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(travel.departureTime,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text(travel.origin,
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade600)),
-                    ],
-                  ),
-                ),
-                Column(
-                  children: [
-                    const Icon(Icons.arrow_forward_rounded,
-                        color: Color(0xFF0F52BA), size: 20),
-                    Text(travel.vehicleType,
-                        style: TextStyle(
-                            fontSize: 10, color: Colors.grey.shade500)),
-                  ],
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(travel.arrivalTime,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text(travel.destination,
-                          style: TextStyle(
-                              fontSize: 12, color: Colors.grey.shade600)),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 24),
-
-            // Price & Book Action
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Rp ${travel.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                      style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.teal),
-                    ),
-                    Text(
-                      'Sisa ${travel.availableSeatsCount} Kursi',
-                      style: TextStyle(
-                          fontSize: 11,
-                          color: travel.availableSeatsCount <= 3
-                              ? Colors.redAccent
-                              : Colors.grey.shade600,
-                          fontWeight: FontWeight.w600),
-                    ),
-                  ],
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => BookingScreen(
-                          travel: travel,
-                          onBookingCompleted: widget.onNavigateToBookings,
-                        ),
+                      Text(
+                        'Rp ${travel.price.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
+                        style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.teal),
                       ),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F52BA),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
+                      Text(
+                        'Sisa ${travel.availableSeatsCount} Kursi',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: travel.availableSeatsCount <= 3
+                                ? Colors.redAccent
+                                : Colors.grey.shade600,
+                            fontWeight: FontWeight.w600),
+                      ),
+                    ],
                   ),
-                  child: const Text('Pesan Kursi',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ],
-            ),
-          ],
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingScreen(
+                            travel: travel,
+                            onBookingCompleted: widget.onNavigateToBookings,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F52BA),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    child: const Text('Pesan Kursi',
+                        style: TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

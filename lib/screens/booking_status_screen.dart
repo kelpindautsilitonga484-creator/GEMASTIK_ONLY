@@ -289,10 +289,15 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
   Widget build(BuildContext context) {
     final activeBookings = TravelRepository.userBookings
         .where((b) =>
-            b.status == 'Dikonfirmasi' || b.status == 'Menunggu Pembayaran')
+            b.status == 'Dikonfirmasi' ||
+            b.status == 'Menunggu Pembayaran' ||
+            b.status == 'Menunggu Konfirmasi')
         .toList();
     final historyBookings = TravelRepository.userBookings
-        .where((b) => b.status == 'Selesai' || b.status == 'Dibatalkan')
+        .where((b) =>
+            b.status == 'Selesai' ||
+            b.status == 'Dibatalkan' ||
+            b.status == 'Ditolak')
         .toList();
 
     return Scaffold(
@@ -380,13 +385,14 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
 
     Color statusBgColor = Colors.teal.shade50;
     Color statusTextColor = Colors.teal;
-    if (booking.status == 'Menunggu Pembayaran') {
+    if (booking.status == 'Menunggu Pembayaran' ||
+        booking.status == 'Menunggu Konfirmasi') {
       statusBgColor = Colors.amber.shade50;
       statusTextColor = Colors.amber.shade900;
     } else if (booking.status == 'Selesai') {
       statusBgColor = Colors.blue.shade50;
       statusTextColor = const Color(0xFF0F52BA);
-    } else if (booking.status == 'Dibatalkan') {
+    } else if (booking.status == 'Dibatalkan' || booking.status == 'Ditolak') {
       statusBgColor = Colors.red.shade50;
       statusTextColor = Colors.redAccent;
     }

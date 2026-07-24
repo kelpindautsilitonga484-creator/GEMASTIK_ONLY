@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
-import 'main_navigation_screen.dart';
-import 'register_screen.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController =
-      TextEditingController(text: 'penumpang@traveltrack.com');
-  final _passwordController = TextEditingController(text: '123456');
+  final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool _isPasswordObscured = true;
+  bool _isConfirmPasswordObscured = true;
   bool _isLoading = false;
 
-  void _handleLogin() {
+  void _handleRegister() {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
@@ -25,25 +27,30 @@ class _LoginScreenState extends State<LoginScreen> {
 
       Future.delayed(const Duration(milliseconds: 800), () {
         if (!mounted) return;
+        setState(() {
+          _isLoading = false;
+        });
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Login Berhasil! Selamat Datang di TravelTrack.'),
+            content: Text('Registrasi Berhasil! Silakan masuk ke akun Anda.'),
             backgroundColor: Colors.teal,
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const MainNavigationScreen()),
-        );
+
+        Navigator.pop(context);
       });
     }
   }
 
   @override
   void dispose() {
+    _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -51,17 +58,22 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6F9),
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: const Color(0xFF0F172A),
+      ),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding:
-                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Header Logo
+                // Header Icon
                 Container(
-                  padding: const EdgeInsets.all(18),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: const Color(0xFF0F52BA),
                     shape: BoxShape.circle,
@@ -74,8 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   child: const Icon(
-                    Icons.directions_bus_filled_rounded,
-                    size: 48,
+                    Icons.person_add_alt_1_rounded,
+                    size: 40,
                     color: Colors.white,
                   ),
                 ),
@@ -85,39 +97,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Text(
                   'TravelTrack',
                   style: TextStyle(
-                    fontSize: 30,
+                    fontSize: 28,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF1E293B),
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.person_rounded,
-                          size: 14, color: Color(0xFF0F52BA)),
-                      SizedBox(width: 4),
-                      Text(
-                        'Portal Penumpang (Posman - K1)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF0F52BA),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 20),
 
                 // Card Form
                 Card(
@@ -134,7 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const Text(
-                            'Masuk Akun',
+                            'Daftar Akun Penumpang',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -143,20 +129,43 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Masukkan email dan kata sandi Anda untuk memesan tiket travel.',
+                            'Lengkapi data diri Anda untuk membuat akun baru.',
                             style: TextStyle(
                               fontSize: 13,
                               color: Colors.grey.shade600,
                             ),
                           ),
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 20),
+
+                          // Full Name Input
+                          TextFormField(
+                            controller: _nameController,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: InputDecoration(
+                              labelText: 'Nama Lengkap',
+                              hintText: 'Masukkan nama lengkap',
+                              prefixIcon: const Icon(Icons.person_outline),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Nama lengkap tidak boleh kosong';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
 
                           // Email Input
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
                             decoration: InputDecoration(
-                              labelText: 'Email / Username',
+                              labelText: 'Email',
                               hintText: 'contoh@email.com',
                               prefixIcon: const Icon(Icons.email_outlined),
                               border: OutlineInputBorder(
@@ -169,10 +178,47 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (value == null || value.trim().isEmpty) {
                                 return 'Email tidak boleh kosong';
                               }
+                              final emailRegex =
+                                  RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                              if (!emailRegex.hasMatch(value.trim())) {
+                                return 'Format email tidak valid';
+                              }
                               return null;
                             },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 14),
+
+                          // Phone Number Input
+                          TextFormField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            decoration: InputDecoration(
+                              labelText: 'Nomor Telepon',
+                              hintText: '081234567890',
+                              prefixIcon:
+                                  const Icon(Icons.phone_android_outlined),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Nomor telepon tidak boleh kosong';
+                              }
+                              final phoneTrimmed = value.trim();
+                              if (!RegExp(r'^[0-9]+$').hasMatch(phoneTrimmed)) {
+                                return 'Nomor telepon hanya boleh berisi angka';
+                              }
+                              if (phoneTrimmed.length < 9 ||
+                                  phoneTrimmed.length > 15) {
+                                return 'Nomor telepon harus antara 9-15 digit';
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 14),
 
                           // Password Input
                           TextFormField(
@@ -204,40 +250,57 @@ class _LoginScreenState extends State<LoginScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'Kata sandi tidak boleh kosong';
                               }
+                              if (value.length < 6) {
+                                return 'Kata sandi minimal 6 karakter';
+                              }
                               return null;
                             },
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 14),
 
-                          // Forgot Password
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: TextButton(
-                              onPressed: () {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                        'Fitur Lupa Password: Kode OTP dikirim ke email demo.'),
-                                  ),
-                                );
-                              },
-                              child: const Text(
-                                'Lupa Kata Sandi?',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFF0F52BA),
+                          // Confirm Password Input
+                          TextFormField(
+                            controller: _confirmPasswordController,
+                            obscureText: _isConfirmPasswordObscured,
+                            decoration: InputDecoration(
+                              labelText: 'Konfirmasi Kata Sandi',
+                              prefixIcon: const Icon(Icons.lock_reset_outlined),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _isConfirmPasswordObscured
+                                      ? Icons.visibility_off_outlined
+                                      : Icons.visibility_outlined,
                                 ),
+                                onPressed: () {
+                                  setState(() {
+                                    _isConfirmPasswordObscured =
+                                        !_isConfirmPasswordObscured;
+                                  });
+                                },
                               ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 14),
                             ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Konfirmasi kata sandi tidak boleh kosong';
+                              }
+                              if (value != _passwordController.text) {
+                                return 'Konfirmasi kata sandi tidak cocok';
+                              }
+                              return null;
+                            },
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 24),
 
-                          // Login Button
+                          // Register Button
                           SizedBox(
                             height: 50,
                             child: ElevatedButton(
-                              onPressed: _isLoading ? null : _handleLogin,
+                              onPressed: _isLoading ? null : _handleRegister,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF0F52BA),
                                 foregroundColor: Colors.white,
@@ -256,7 +319,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     )
                                   : const Text(
-                                      'MASUK SEBAGAI PENUMPANG',
+                                      'DAFTAR SEKARANG',
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
@@ -272,25 +335,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Register Link
+                // Back to Login Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Belum punya akun? ',
+                      'Sudah punya akun? ',
                       style:
                           TextStyle(color: Colors.grey.shade700, fontSize: 14),
                     ),
                     GestureDetector(
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const RegisterScreen()),
-                        );
+                        Navigator.pop(context);
                       },
                       child: const Text(
-                        'Daftar Sekarang',
+                        'Masuk',
                         style: TextStyle(
                           color: Color(0xFF0F52BA),
                           fontWeight: FontWeight.bold,
@@ -300,6 +359,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
               ],
             ),
           ),

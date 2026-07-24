@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/travel_model.dart';
-import '../models/booking_model.dart';
-import '../data/dummy_data.dart';
+import 'payment_confirmation_screen.dart';
 
 class BookingScreen extends StatefulWidget {
   final TravelModel travel;
@@ -29,14 +28,13 @@ class _BookingScreenState extends State<BookingScreen> {
   final List<String> _selectedSeats = [];
   String _selectedPaymentMethod = 'QRIS Instant';
   String _serviceTypeOption = 'Pool to Pool';
-  bool _isSubmitting = false;
+  final bool _isSubmitting = false;
 
   final List<String> _paymentMethods = [
-    'QRIS Instant',
     'Transfer Bank BCA',
     'Transfer Bank Mandiri',
-    'E-Wallet GoPay',
-    'E-Wallet ShopeePay',
+    'Bayar di Pool',
+    'QRIS Instant (Simulasi)',
   ];
 
   @override
@@ -70,97 +68,24 @@ class _BookingScreenState extends State<BookingScreen> {
     }
 
     if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isSubmitting = true;
-      });
-
-      final bookingId =
-          'TTR-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().day.toString().padLeft(2, '0')}-${(10 + TravelRepository.userBookings.length + 1)}';
-      final extraCost = _serviceTypeOption == 'Door to Door' ? 15000 : 0;
-      final totalPrice =
-          (widget.travel.price + extraCost) * _selectedSeats.length;
-
-      final newBooking = BookingModel(
-        bookingId: bookingId,
-        travel: widget.travel,
-        passengerName: _nameController.text.trim(),
-        passengerPhone: _phoneController.text.trim(),
-        selectedSeats: List.from(_selectedSeats),
-        totalPrice: totalPrice,
-        paymentMethod: _selectedPaymentMethod,
-        status: 'Dikonfirmasi',
-        bookingDate: DateTime.now(),
-      );
-
-      Future.delayed(const Duration(milliseconds: 900), () {
-        if (!mounted) return;
-        TravelRepository.addBooking(newBooking);
-
-        setState(() {
-          _isSubmitting = false;
-        });
-
-        // Show Success Dialog
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Column(
-              children: const [
-                Icon(Icons.check_circle_rounded, color: Colors.teal, size: 56),
-                SizedBox(height: 10),
-                Text(
-                  'Pemesanan Berhasil!',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  'Kode Booking Anda: $bookingId',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F52BA),
-                      fontSize: 15),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Pengemudi: ${widget.travel.driverName}\nNomor Kursi: ${_selectedSeats.join(', ')}\nTotal Bayar: Rp ${totalPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
-                ),
-              ],
-            ),
-            actions: [
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Close dialog
-                    Navigator.pop(context); // Close booking screen
-                    widget
-                        .onBookingCompleted(); // Navigate to Ticket Status tab
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0F52BA),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: const Text('LIHAT E-TIKET SAYA',
-                      style: TextStyle(fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PaymentConfirmationScreen(
+            travel: widget.travel,
+            passengerName: _nameController.text.trim(),
+            passengerPhone: _phoneController.text.trim(),
+            selectedSeats: List.from(_selectedSeats),
+            serviceType: _serviceTypeOption,
+            pickupAddress: _serviceTypeOption == 'Door to Door'
+                ? _pickupAddressController.text.trim()
+                : '',
+            notes: _notesController.text.trim(),
+            paymentMethod: _selectedPaymentMethod,
+            onBookingCompleted: widget.onBookingCompleted,
           ),
-        );
-      });
+        ),
+      );
     }
   }
 

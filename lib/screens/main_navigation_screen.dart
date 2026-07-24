@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'home_screen.dart';
 import 'travel_list_screen.dart';
 import 'booking_status_screen.dart';
-import 'login_screen.dart';
+import 'profile_screen.dart';
 
 class MainNavigationScreen extends StatefulWidget {
   final int initialIndex;
@@ -43,7 +43,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onBookingSuccess: () => _onTabTapped(2),
       ),
       const BookingStatusScreen(),
-      _buildProfileScreen(context),
+      const ProfileScreen(),
     ];
 
     return Scaffold(
@@ -93,140 +93,6 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
               icon: Icon(Icons.person_rounded),
               activeIcon: Icon(Icons.person_rounded, color: Color(0xFF0F52BA)),
               label: 'Profil',
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProfileScreen(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: const Text('Profil Penumpang',
-            style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: const Color(0xFF0F52BA),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            Center(
-              child: Stack(
-                children: [
-                  CircleAvatar(
-                    radius: 46,
-                    backgroundColor:
-                        const Color(0xFF0F52BA).withValues(alpha: 0.15),
-                    child: const Icon(Icons.person,
-                        size: 56, color: Color(0xFF0F52BA)),
-                  ),
-                  Positioned(
-                    bottom: 0,
-                    right: 0,
-                    child: Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Colors.teal,
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(Icons.check,
-                          size: 16, color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            const Text(
-              'Posman Penumpang',
-              style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF0F172A)),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'penumpang@traveltrack.com • 081234567890',
-              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-            ),
-            const SizedBox(height: 24),
-
-            // Profile menu card
-            Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.badge_outlined,
-                        color: Color(0xFF0F52BA)),
-                    title: const Text('Peran Aplikasi'),
-                    subtitle: const Text('Frontend Penumpang (K1 - Posman)'),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text('K1',
-                          style: TextStyle(
-                              color: Color(0xFF0F52BA),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12)),
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.favorite_outline_rounded,
-                        color: Colors.redAccent),
-                    title: const Text('Rute Favorit'),
-                    subtitle: const Text('Medan ↔ Parapat (Danau Toba)'),
-                    onTap: () {},
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
-                    leading: const Icon(Icons.notifications_none_rounded,
-                        color: Colors.amber),
-                    title: const Text('Notifikasi Pemesanan'),
-                    subtitle: const Text('Aktif'),
-                    onTap: () {},
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Logout Button
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton.icon(
-                onPressed: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LoginScreen()),
-                  );
-                },
-                icon: const Icon(Icons.logout_rounded, color: Colors.redAccent),
-                label: const Text(
-                  'Keluar Akun',
-                  style: TextStyle(
-                      color: Colors.redAccent, fontWeight: FontWeight.bold),
-                ),
-                style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.redAccent),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
             ),
           ],
         ),
