@@ -175,8 +175,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 }).toList(),
                                 onChanged: (val) {
-                                  if (val != null)
+                                  if (val != null) {
                                     setState(() => _selectedOrigin = val);
+                                  }
                                 },
                               ),
                             ),
@@ -216,8 +217,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   );
                                 }).toList(),
                                 onChanged: (val) {
-                                  if (val != null)
+                                  if (val != null) {
                                     setState(() => _selectedDestination = val);
+                                  }
                                 },
                               ),
                             ),

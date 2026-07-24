@@ -285,8 +285,9 @@ class _BookingScreenState extends State<BookingScreen> {
                         fontSize: 12,
                       ),
                       onSelected: (selected) {
-                        if (selected)
+                        if (selected) {
                           setState(() => _serviceTypeOption = 'Pool to Pool');
+                        }
                       },
                     ),
                   ),
@@ -304,8 +305,9 @@ class _BookingScreenState extends State<BookingScreen> {
                         fontSize: 12,
                       ),
                       onSelected: (selected) {
-                        if (selected)
+                        if (selected) {
                           setState(() => _serviceTypeOption = 'Door to Door');
+                        }
                       },
                     ),
                   ),
