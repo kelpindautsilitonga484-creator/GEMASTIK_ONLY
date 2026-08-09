@@ -1,0 +1,20 @@
+Folder PATH listing for volume New Volume
+Volume serial number is 0000020A 4A80:483D
+D:\PERKULIAHAN\MINI PROJECT\MINI_PROJECT_\GEMASTIK_ONLY\LIB
+|   main.dart
+|   
++---data
+|       dummy_data.dart
+|       
++---models
+|       booking_model.dart
+|       travel_model.dart
+|       
+\---screens
+        booking_screen.dart
+        booking_status_screen.dart
+        home_screen.dart
+        login_screen.dart
+        main_navigation_screen.dart
+        travel_list_screen.dart
+        
