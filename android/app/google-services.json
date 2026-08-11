@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1053292896141",
+    "project_id": "traveltrack-gemastik-app",
+    "storage_bucket": "traveltrack-gemastik-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1053292896141:android:ef50b4ad8e3f4e23e9a7c4",
+        "android_client_info": {
+          "package_name": "com.example.app_gemastik"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtH_6pO9pSCtt-w23uq59aMWoHxbhj8VA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
