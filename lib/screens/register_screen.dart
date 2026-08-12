@@ -20,6 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
   bool _isLoading = false;
+  
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
