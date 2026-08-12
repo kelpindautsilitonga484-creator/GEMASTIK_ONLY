@@ -16,6 +16,7 @@ class MainNavigationScreen extends StatefulWidget {
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   late int _currentIndex;
   String _activeSearchQuery = '';
+  int _bookingRefreshVersion = 0;
 
   @override
   void initState() {
@@ -27,6 +28,9 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
     setState(() {
       _currentIndex = index;
       _activeSearchQuery = search;
+      if (index == 2) {
+        _bookingRefreshVersion++;
+      }
     });
   }
 
@@ -42,7 +46,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         initialOrigin: _activeSearchQuery,
         onBookingSuccess: () => _onTabTapped(2),
       ),
-      const BookingStatusScreen(),
+      BookingStatusScreen(key: ValueKey('booking_$_bookingRefreshVersion')),
       const ProfileScreen(),
     ];
 

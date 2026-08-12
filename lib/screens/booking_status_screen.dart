@@ -1,6 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../data/dummy_data.dart';
 import '../models/booking_model.dart';
+import '../services/booking_service.dart';
 
 class BookingStatusScreen extends StatefulWidget {
   const BookingStatusScreen({super.key});
@@ -12,17 +13,33 @@ class BookingStatusScreen extends StatefulWidget {
 class _BookingStatusScreenState extends State<BookingStatusScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late Future<List<BookingModel>> _bookingsFuture;
+  String? _cancellingBookingId;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _bookingsFuture = _fetchBookings();
   }
 
   @override
   void dispose() {
     _tabController.dispose();
     super.dispose();
+  }
+
+  Future<List<BookingModel>> _fetchBookings() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return [];
+    return BookingService.getUserBookings(user.uid);
+  }
+
+  void _reloadBookings() {
+    if (!mounted) return;
+    setState(() {
+      _bookingsFuture = _fetchBookings();
+    });
   }
 
   void _showETicketDialog(BookingModel booking) {
@@ -66,8 +83,8 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
                       style: const TextStyle(
                           fontWeight: FontWeight.bold, fontSize: 14)),
                   Text('${travel.vehicleType} • ${travel.plateNumber}',
-                      style:
-                          TextStyle(fontSize: 12, color: Colors.grey.shade700)),
+                      style: TextStyle(
+                          fontSize: 12, color: Colors.grey.shade700)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -182,18 +199,12 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
             child: const Text('Kembali'),
           ),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              setState(() {
-                TravelRepository.cancelBooking(booking.bookingId);
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Pemesanan tiket berhasil dibatalkan.'),
-                  backgroundColor: Colors.redAccent,
-                ),
-              );
-            },
+            onPressed: _cancellingBookingId != null
+                ? null
+                : () {
+                    Navigator.pop(context);
+                    _executeCancelBooking(booking);
+                  },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
               foregroundColor: Colors.white,
@@ -203,6 +214,45 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
         ],
       ),
     );
+  }
+
+  Future<void> _executeCancelBooking(BookingModel booking) async {
+    if (_cancellingBookingId != null) return;
+
+    setState(() {
+      _cancellingBookingId = booking.bookingId;
+    });
+
+    try {
+      await BookingService.cancelBooking(booking.bookingId);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pemesanan tiket berhasil dibatalkan.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+
+      _reloadBookings();
+    } catch (e) {
+      if (!mounted) return;
+
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal membatalkan pesanan: $errorMessage'),
+          backgroundColor: Colors.red.shade800,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _cancellingBookingId = null;
+        });
+      }
+    }
   }
 
   void _showRatingDialog(BookingModel booking) {
@@ -287,19 +337,6 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
 
   @override
   Widget build(BuildContext context) {
-    final activeBookings = TravelRepository.userBookings
-        .where((b) =>
-            b.status == 'Dikonfirmasi' ||
-            b.status == 'Menunggu Pembayaran' ||
-            b.status == 'Menunggu Konfirmasi')
-        .toList();
-    final historyBookings = TravelRepository.userBookings
-        .where((b) =>
-            b.status == 'Selesai' ||
-            b.status == 'Dibatalkan' ||
-            b.status == 'Ditolak')
-        .toList();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -322,12 +359,72 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildBookingList(activeBookings, isActiveTab: true),
-          _buildBookingList(historyBookings, isActiveTab: false),
-        ],
+      body: FutureBuilder<List<BookingModel>>(
+        future: _bookingsFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline_rounded,
+                      size: 64, color: Colors.redAccent),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Gagal memuat tiket',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.redAccent),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Periksa koneksi internet Anda.',
+                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: _reloadBookings,
+                    icon: const Icon(Icons.refresh_rounded),
+                    label: const Text('Coba Lagi'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF0F52BA),
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final allBookings = snapshot.data ?? [];
+
+          final activeBookings = allBookings
+              .where((b) =>
+                  b.status == 'Dikonfirmasi' ||
+                  b.status == 'Menunggu Pembayaran' ||
+                  b.status == 'Menunggu Konfirmasi')
+              .toList();
+
+          final historyBookings = allBookings
+              .where((b) =>
+                  b.status == 'Selesai' ||
+                  b.status == 'Dibatalkan' ||
+                  b.status == 'Ditolak')
+              .toList();
+
+          return TabBarView(
+            controller: _tabController,
+            children: [
+              _buildBookingList(activeBookings, isActiveTab: true),
+              _buildBookingList(historyBookings, isActiveTab: false),
+            ],
+          );
+        },
       ),
     );
   }
@@ -397,6 +494,9 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
       statusTextColor = Colors.redAccent;
     }
 
+    final bool isCancellingThis =
+        _cancellingBookingId == booking.bookingId;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 3,
@@ -412,39 +512,55 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
             children: [
               // Ticket Header (Code & Status)
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.qr_code_rounded,
-                          color: Color(0xFF0F52BA), size: 20),
-                      const SizedBox(width: 6),
-                      Text(
+                  Expanded(
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.qr_code_rounded,
+                          color: Color(0xFF0F52BA),
+                          size: 20,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                      child: Text(
                         booking.bookingId,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Color(0xFF0F172A)),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: statusBgColor,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      booking.status,
-                      style: TextStyle(
-                          color: statusTextColor,
                           fontWeight: FontWeight.bold,
-                          fontSize: 12),
+                          fontSize: 14,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
+
+    const SizedBox(width: 8),
+
+    Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      decoration: BoxDecoration(
+        color: statusBgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        booking.status,
+        maxLines: 1,
+        style: TextStyle(
+          color: statusTextColor,
+          fontWeight: FontWeight.bold,
+          fontSize: 11,
+        ),
+      ),
+    ),
+  ],
+),
               const Divider(height: 20),
 
               // Operator & Time
@@ -529,14 +645,39 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
                           ),
                         ),
                         const SizedBox(width: 8),
-                        TextButton(
-                          onPressed: () => _confirmCancelBooking(booking),
-                          child: const Text('Batalkan',
-                              style: TextStyle(
-                                  color: Colors.redAccent, fontSize: 12)),
-                        ),
+                        isCancellingThis
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.redAccent),
+                              )
+                            : TextButton(
+                                onPressed: () =>
+                                    _confirmCancelBooking(booking),
+                                child: const Text('Batalkan',
+                                    style: TextStyle(
+                                        color: Colors.redAccent,
+                                        fontSize: 12)),
+                              ),
                       ],
                     ),
+                  ] else if (booking.status == 'Menunggu Konfirmasi' ||
+                      booking.status == 'Menunggu Pembayaran') ...[
+                    isCancellingThis
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.redAccent),
+                          )
+                        : TextButton(
+                            onPressed: () => _confirmCancelBooking(booking),
+                            child: const Text('Batalkan',
+                                style: TextStyle(
+                                    color: Colors.redAccent, fontSize: 12)),
+                          ),
                   ] else if (booking.status == 'Selesai') ...[
                     OutlinedButton.icon(
                       onPressed: () => _showRatingDialog(booking),
