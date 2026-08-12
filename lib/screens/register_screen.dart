@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -18,29 +20,141 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
   bool _isLoading = false;
+  Future<void> _handleRegister() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  void _handleRegister() {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
+    FocusScope.of(context).unfocus();
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    User? createdUser;
+
+    try {
+      final name = _nameController.text.trim();
+      final email = _emailController.text.trim().toLowerCase();
+      final phone = _phoneController.text.trim();
+      final password = _passwordController.text;
+
+      // 1. Buat akun di Firebase Authentication
+      final credential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      createdUser = credential.user;
+
+      if (createdUser == null) {
+        throw Exception('Gagal membuat akun pengguna.');
+      }
+
+      // 2. Simpan data profil ke Cloud Firestore
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(createdUser.uid)
+          .set({
+        'uid': createdUser.uid,
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'role': 'passenger',
+        'createdAt': FieldValue.serverTimestamp(),
+        'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      Future.delayed(const Duration(milliseconds: 800), () {
-        if (!mounted) return;
+      // Karena setelah register kita ingin user login sendiri
+      await FirebaseAuth.instance.signOut();
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Registrasi berhasil! Silakan masuk menggunakan akun Anda.',
+          ),
+          backgroundColor: Colors.teal,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      Navigator.pop(context);
+    } on FirebaseAuthException catch (e) {
+      String message;
+
+      switch (e.code) {
+        case 'email-already-in-use':
+          message = 'Email tersebut sudah terdaftar.';
+          break;
+
+        case 'weak-password':
+          message = 'Kata sandi terlalu lemah.';
+          break;
+
+        case 'invalid-email':
+          message = 'Format email tidak valid.';
+          break;
+
+        case 'network-request-failed':
+          message = 'Tidak dapat terhubung ke internet.';
+          break;
+
+        case 'too-many-requests':
+          message = 'Terlalu banyak percobaan. Coba lagi beberapa saat.';
+          break;
+
+        default:
+          message = e.message ?? 'Registrasi gagal.';
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } on FirebaseException catch (e) {
+      // Jika Auth berhasil tetapi Firestore gagal,
+      // hapus akun supaya tidak tersisa akun setengah jadi.
+      if (createdUser != null) {
+        try {
+          await createdUser.delete();
+        } catch (_) {}
+
+        await FirebaseAuth.instance.signOut();
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Gagal menyimpan data pengguna: ${e.message ?? e.code}',
+          ),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Terjadi kesalahan saat registrasi.'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) {
         setState(() {
           _isLoading = false;
         });
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Registrasi Berhasil! Silakan masuk ke akun Anda.'),
-            backgroundColor: Colors.teal,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-
-        Navigator.pop(context);
-      });
+      }
     }
   }
 
