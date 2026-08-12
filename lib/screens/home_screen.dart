@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../data/dummy_data.dart';
+import '../services/travel_service.dart';
 import '../models/travel_model.dart';
 import 'booking_screen.dart';
 import 'travel_detail_screen.dart';
@@ -27,6 +27,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String _selectedOrigin = 'Medan';
   String _selectedDestination = 'Parapat (Danau Toba)';
   DateTime _selectedDate = DateTime.now();
+  late Future<List<TravelModel>> _popularTravelsFuture;
 
   final List<String> _cities = [
     'Medan',
@@ -45,6 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadUserName();
+    _popularTravelsFuture = TravelService.getPopularTravels(limit: 3);
+  }
+
+  void _retryLoadPopularTravels() {
+    setState(() {
+      _popularTravelsFuture = TravelService.getPopularTravels(limit: 3);
+    });
   }
 
   Future<void> _loadUserName() async {
@@ -91,8 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final popularTravels = TravelRepository.dummyTravels;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SingleChildScrollView(
@@ -462,19 +468,84 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 8),
 
             // Popular Travel List
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              itemCount: popularTravels.length > 3
-                  ? 3
-                  : popularTravels.length,
-              itemBuilder: (context, index) {
-                final travel = popularTravels[index];
+            FutureBuilder<List<TravelModel>>(
+              future: _popularTravelsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40.0),
+                    child: Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
 
-                return _buildTravelCard(
-                  context,
-                  travel,
+                if (snapshot.hasError) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 20.0),
+                    child: Column(
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          size: 40,
+                          color: Color(0xFFEF4444),
+                        ),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Gagal memuat jadwal',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ElevatedButton.icon(
+                          onPressed: _retryLoadPopularTravels,
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: const Text('Coba Lagi'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F52BA),
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final popularTravels = snapshot.data ?? [];
+
+                if (popularTravels.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 30.0),
+                    child: Center(
+                      child: Text(
+                        'Belum ada jadwal travel populer.',
+                        style: TextStyle(
+                          color: Color(0xFF64748B),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                  itemCount:
+                      popularTravels.length > 3 ? 3 : popularTravels.length,
+                  itemBuilder: (context, index) {
+                    final travel = popularTravels[index];
+
+                    return _buildTravelCard(
+                      context,
+                      travel,
+                    );
+                  },
                 );
               },
             ),

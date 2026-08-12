@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../data/dummy_data.dart';
+import '../services/travel_service.dart';
 import '../models/travel_model.dart';
 import 'booking_screen.dart';
 import 'travel_detail_screen.dart';
@@ -24,6 +24,7 @@ class _TravelListScreenState extends State<TravelListScreen> {
   late TextEditingController _searchController;
   String _searchQuery = '';
   String _activeFilter = 'Semua';
+  late Future<List<TravelModel>> _travelsFuture;
 
   final List<String> _filters = [
     'Semua',
@@ -43,6 +44,13 @@ class _TravelListScreenState extends State<TravelListScreen> {
     }
     _searchController = TextEditingController(text: defaultText);
     _searchQuery = defaultText;
+    _travelsFuture = TravelService.getTravels();
+  }
+
+  void _retryLoadTravels() {
+    setState(() {
+      _travelsFuture = TravelService.getTravels();
+    });
   }
 
   @override
@@ -53,37 +61,6 @@ class _TravelListScreenState extends State<TravelListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<TravelModel> filteredList = TravelRepository.dummyTravels.where((t) {
-      final query = _searchQuery.toLowerCase();
-      final matchesQuery = t.providerName.toLowerCase().contains(query) ||
-          t.origin.toLowerCase().contains(query) ||
-          t.destination.toLowerCase().contains(query) ||
-          t.departurePool.toLowerCase().contains(query) ||
-          t.vehicleType.toLowerCase().contains(query);
-
-      if (!matchesQuery) return false;
-
-      if (_activeFilter == 'Door to Door') {
-        return t.serviceType == 'Door to Door' ||
-            t.facilities.contains('Door to Door');
-      } else if (_activeFilter == 'Shuttle Bandara') {
-        return t.origin.toLowerCase().contains('kualanamu') ||
-            t.destination.toLowerCase().contains('silangit') ||
-            t.providerName.toLowerCase().contains('damri');
-      }
-
-      return true;
-    }).toList();
-
-    // Sort based on filter
-    if (_activeFilter == 'Terpagi') {
-      filteredList.sort((a, b) => a.departureTime.compareTo(b.departureTime));
-    } else if (_activeFilter == 'Termurah') {
-      filteredList.sort((a, b) => a.price.compareTo(b.price));
-    } else if (_activeFilter == 'Rating') {
-      filteredList.sort((a, b) => b.rating.compareTo(a.rating));
-    }
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -170,8 +147,94 @@ class _TravelListScreenState extends State<TravelListScreen> {
 
           // Travel Item List
           Expanded(
-            child: filteredList.isEmpty
-                ? Center(
+            child: FutureBuilder<List<TravelModel>>(
+              future: _travelsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+
+                if (snapshot.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error_outline_rounded,
+                          size: 48,
+                          color: Color(0xFFEF4444),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Gagal memuat daftar travel',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        const Text(
+                          'Periksa koneksi Anda dan coba lagi.',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF64748B),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _retryLoadTravels,
+                          icon: const Icon(Icons.refresh_rounded, size: 18),
+                          label: const Text('Coba Lagi'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0F52BA),
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                final rawTravels = snapshot.data ?? [];
+
+                List<TravelModel> filteredList = rawTravels.where((t) {
+                  final query = _searchQuery.toLowerCase();
+                  final matchesQuery =
+                      t.providerName.toLowerCase().contains(query) ||
+                          t.origin.toLowerCase().contains(query) ||
+                          t.destination.toLowerCase().contains(query) ||
+                          t.departurePool.toLowerCase().contains(query) ||
+                          t.vehicleType.toLowerCase().contains(query);
+
+                  if (!matchesQuery) return false;
+
+                  if (_activeFilter == 'Door to Door') {
+                    return t.serviceType == 'Door to Door' ||
+                        t.facilities.contains('Door to Door');
+                  } else if (_activeFilter == 'Shuttle Bandara') {
+                    return t.origin.toLowerCase().contains('kualanamu') ||
+                        t.destination.toLowerCase().contains('silangit') ||
+                        t.providerName.toLowerCase().contains('damri');
+                  }
+
+                  return true;
+                }).toList();
+
+                // Sort based on filter
+                if (_activeFilter == 'Terpagi') {
+                  filteredList.sort(
+                      (a, b) => a.departureTime.compareTo(b.departureTime));
+                } else if (_activeFilter == 'Termurah') {
+                  filteredList.sort((a, b) => a.price.compareTo(b.price));
+                } else if (_activeFilter == 'Rating') {
+                  filteredList.sort((a, b) => b.rating.compareTo(a.rating));
+                }
+
+                if (filteredList.isEmpty) {
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -193,15 +256,19 @@ class _TravelListScreenState extends State<TravelListScreen> {
                         ),
                       ],
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16.0),
-                    itemCount: filteredList.length,
-                    itemBuilder: (context, index) {
-                      final travel = filteredList[index];
-                      return _buildDetailedTravelCard(context, travel);
-                    },
-                  ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(16.0),
+                  itemCount: filteredList.length,
+                  itemBuilder: (context, index) {
+                    final travel = filteredList[index];
+                    return _buildDetailedTravelCard(context, travel);
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),
