@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../services/location_service.dart';
 import '../../services/firebase_service.dart';
@@ -20,7 +21,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
 
   StreamSubscription<Position>? _positionSubscription;
 
-  void _startLocationTracking() {
+  void _startLocationTracking(String driverId) {
     _positionSubscription?.cancel();
 
     _positionSubscription = LocationService.getLocationStream().listen(
@@ -33,7 +34,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
 
         try {
           await FirebaseService.updateDriverLocation(
-            driverId: 'driver_001',
+            driverId: driverId,
             vehicleId: 'TT-001',
             position: position,
             isActive: true,
@@ -59,6 +60,29 @@ class _DriverDashboardState extends State<DriverDashboard> {
   }
 
   Future<void> _toggleTrip() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      if (isTripActive) {
+        _stopLocationTracking();
+        setState(() {
+          isTripActive = false;
+        });
+      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Sesi sopir tidak valid. Silakan login kembali.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     // ==========================================
     // JIKA PERJALANAN SEDANG AKTIF
     // ==========================================
@@ -73,7 +97,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
       if (currentPosition != null) {
         try {
           await FirebaseService.updateDriverLocation(
-            driverId: 'driver_001',
+            driverId: user.uid,
             vehicleId: 'TT-001',
             position: currentPosition!,
             isActive: false,
@@ -191,11 +215,11 @@ class _DriverDashboardState extends State<DriverDashboard> {
       isLoadingLocation = false;
     });
 
-    _startLocationTracking();
+    _startLocationTracking(user.uid);
 
     try {
       await FirebaseService.updateDriverLocation(
-        driverId: 'driver_001',
+        driverId: user.uid,
         vehicleId: 'TT-001',
         position: position,
         isActive: true,

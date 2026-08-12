@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'driver/driver_dashboard.dart';
 import 'main_navigation_screen.dart';
 import 'register_screen.dart';
 
@@ -33,12 +35,54 @@ class _LoginScreenState extends State<LoginScreen> {
       final email = _emailController.text.trim().toLowerCase();
       final password = _passwordController.text;
 
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
 
+      final user = credential.user;
+
+      if (user == null) {
+        throw Exception('Gagal mendapatkan data autentikasi.');
+      }
+
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
       if (!mounted) return;
+
+      if (!userDoc.exists) {
+        await FirebaseAuth.instance.signOut();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data akun tidak ditemukan.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      final role = userDoc.data()?['role']?.toString();
+
+      Widget destinationScreen;
+      if (role == 'driver') {
+        destinationScreen = const DriverDashboard();
+      } else if (role == 'passenger') {
+        destinationScreen = const MainNavigationScreen();
+      } else {
+        await FirebaseAuth.instance.signOut();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Peran akun tidak dikenali.'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -51,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => const MainNavigationScreen(),
+          builder: (context) => destinationScreen,
         ),
       );
     } on FirebaseAuthException catch (e) {

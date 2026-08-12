@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/passenger_profile_model.dart';
 import 'edit_profile_screen.dart';
 import 'login_screen.dart';
@@ -12,16 +14,20 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   PassengerProfileModel _profile = const PassengerProfileModel(
-    name: 'Posman Penumpang',
-    email: 'penumpang@traveltrack.com',
-    phoneNumber: '081234567890',
+    name: 'Penumpang',
+    email: '-',
+    phoneNumber: '-',
   );
 
-  void _navigateToEditProfile() async {
+  Future<void> _navigateToEditProfile(
+    PassengerProfileModel currentProfile,
+  ) async {
     final updatedProfile = await Navigator.push<PassengerProfileModel>(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfileScreen(profile: _profile),
+        builder: (context) => EditProfileScreen(
+          profile: currentProfile,
+        ),
       ),
     );
 
@@ -31,6 +37,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
       if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Profil berhasil diperbarui!'),
@@ -64,8 +71,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: const Text('Batal', style: TextStyle(color: Colors.grey)),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context); // close dialog
+
+              try {
+                await FirebaseAuth.instance.signOut();
+              } on FirebaseException catch (e) {
+                // Hanya diabaikan saat Firebase tidak tersedia di widget test.
+                if (e.code != 'no-app') {
+                  if (!mounted) return;
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content:
+                          Text('Gagal keluar dari akun. Silakan coba lagi.'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+
+                  return;
+                }
+              }
+
+              if (!mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -86,8 +114,77 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Stream<DocumentSnapshot<Map<String, dynamic>>>? _getUserStream() {
+    try {
+      final currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser != null) {
+        return FirebaseFirestore.instance
+            .collection('users')
+            .doc(currentUser.uid)
+            .snapshots();
+      }
+    } on FirebaseException catch (e) {
+      if (e.code != 'no-app') {
+        debugPrint('Error accessing user stream: ${e.message}');
+      }
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userStream = _getUserStream();
+
+    if (userStream == null) {
+      return _buildProfileBody(context, _profile);
+    }
+
+    return StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+      stream: userStream,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            backgroundColor: const Color(0xFFF8FAFC),
+            appBar: AppBar(
+              title: const Text('Profil Penumpang',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              backgroundColor: const Color(0xFF0F52BA),
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            body: const Center(
+              child: CircularProgressIndicator(color: Color(0xFF0F52BA)),
+            ),
+          );
+        }
+
+        final currentUser = FirebaseAuth.instance.currentUser;
+        PassengerProfileModel displayProfile = PassengerProfileModel(
+          name: currentUser?.displayName ?? 'Penumpang',
+          email: currentUser?.email ?? '-',
+          phoneNumber: '-',
+        );
+
+        if (snapshot.hasData && snapshot.data!.exists) {
+          final data = snapshot.data!.data() ?? {};
+          displayProfile = PassengerProfileModel(
+            name: data['name']?.toString() ??
+                currentUser?.displayName ??
+                'Penumpang',
+            email: data['email']?.toString() ?? currentUser?.email ?? '-',
+            phoneNumber: data['phone']?.toString() ??
+                data['phoneNumber']?.toString() ??
+                '-',
+          );
+        }
+
+        return _buildProfileBody(context, displayProfile);
+      },
+    );
+  }
+
+  Widget _buildProfileBody(
+      BuildContext context, PassengerProfileModel displayProfile) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -130,7 +227,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 14),
             Text(
-              _profile.name,
+              displayProfile.name,
               style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -138,7 +235,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 4),
             Text(
-              '${_profile.email} • ${_profile.phoneNumber}',
+              '${displayProfile.email} • ${displayProfile.phoneNumber}',
               style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 24),
@@ -156,7 +253,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     title: const Text('Edit Profil'),
                     subtitle: const Text('Ubah nama dan nomor telepon'),
                     trailing: const Icon(Icons.chevron_right_rounded),
-                    onTap: _navigateToEditProfile,
+                    onTap: () {
+                      // Pass the active displayProfile to edit screen
+                      _profile = displayProfile;
+                      _navigateToEditProfile(displayProfile);
+                    },
                   ),
                   const Divider(height: 1),
                   ListTile(

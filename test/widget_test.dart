@@ -102,7 +102,7 @@ void main() {
     );
 
     // Verify ProfileScreen contents
-    expect(find.text('Posman Penumpang'), findsOneWidget);
+    expect(find.text('Penumpang'), findsOneWidget);
     expect(find.text('Edit Profil'), findsOneWidget);
 
     // Tap on Edit Profil
@@ -113,12 +113,13 @@ void main() {
     expect(find.text('Edit Profil'), findsOneWidget);
     expect(find.text('SIMPAN PERUBAHAN'), findsOneWidget);
 
-    // Tap save changes button
-    await tester.tap(find.text('SIMPAN PERUBAHAN'));
+    // Kembali ke ProfileScreen tanpa menyimpan.
+    // Penyimpanan profile sekarang membutuhkan Firebase user yang aktif
+    await tester.pageBack();
     await tester.pumpAndSettle();
 
-    // Verify returning to ProfileScreen and showing SnackBar
-    expect(find.text('Profil berhasil diperbarui!'), findsOneWidget);
+    // Verify kembali ke ProfileScreen
+    expect(find.text('Profil Penumpang'), findsOneWidget);
 
     // Tap Keluar Akun button
     final logoutButtonFinder = find.text('Keluar Akun');
