@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/travel_model.dart';
 import '../models/booking_model.dart';
-import '../data/dummy_data.dart';
+import '../services/booking_service.dart';
 
 class PaymentConfirmationScreen extends StatefulWidget {
   final TravelModel travel;
@@ -340,41 +340,40 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
     );
   }
 
-  void _processPayment() {
+  Future<void> _processPayment() async {
+    if (_isSubmitting) return;
+
     setState(() {
       _isSubmitting = true;
     });
 
-    final bookingId =
-        'TTR-${DateTime.now().year}${DateTime.now().month.toString().padLeft(2, '0')}${DateTime.now().day.toString().padLeft(2, '0')}-${(10 + TravelRepository.userBookings.length + 1)}';
     final extraCost = widget.serviceType == 'Door to Door' ? 15000 : 0;
     final totalPrice =
         (widget.travel.price + extraCost) * widget.selectedSeats.length;
 
-    final newBooking = BookingModel(
-      bookingId: bookingId,
-      travel: widget.travel,
-      passengerName: widget.passengerName,
-      passengerPhone: widget.passengerPhone,
-      selectedSeats: List.from(widget.selectedSeats),
-      totalPrice: totalPrice,
-      paymentMethod: widget.paymentMethod,
-      status: 'Menunggu Konfirmasi',
-      bookingDate: DateTime.now(),
-    );
+    try {
+      final bookingId = await BookingService.createBooking(
+        travel: widget.travel,
+        passengerName: widget.passengerName,
+        passengerPhone: widget.passengerPhone,
+        selectedSeats: widget.selectedSeats,
+        serviceType: widget.serviceType,
+        pickupAddress: widget.pickupAddress,
+        notes: widget.notes,
+        paymentMethod: widget.paymentMethod,
+        totalPrice: totalPrice,
+      );
 
-    Future.delayed(const Duration(milliseconds: 600), () {
       if (!mounted) return;
-      TravelRepository.addBooking(newBooking);
 
       setState(() {
         _isSubmitting = false;
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-              'Pesanan berhasil dibuat! Status pesanan: Menunggu Konfirmasi.'),
+              'Pesanan $bookingId berhasil dibuat! Status pesanan: Menunggu Konfirmasi.'),
           backgroundColor: Colors.teal,
           behavior: SnackBarBehavior.floating,
         ),
@@ -387,6 +386,21 @@ class _PaymentConfirmationScreenState extends State<PaymentConfirmationScreen> {
         Navigator.pop(context); // close BookingScreen
       }
       widget.onBookingCompleted(); // trigger tab to status
-    });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isSubmitting = false;
+      });
+
+      final errorMessage = e.toString().replaceAll('Exception: ', '');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal membuat pesanan: $errorMessage'),
+          backgroundColor: Colors.redAccent,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 }

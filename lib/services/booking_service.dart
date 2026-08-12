@@ -56,11 +56,6 @@ class BookingService {
         throw Exception('Jadwal travel tidak ditemukan di database.');
       }
 
-      final bookingDocSnapshot = await transaction.get(bookingRef);
-      if (bookingDocSnapshot.exists) {
-        throw Exception('ID Booking sudah digunakan, silakan coba lagi.');
-      }
-
       final travelData = travelSnapshot.data() ?? {};
       final List<dynamic> currentOccupied = travelData['occupiedSeats'] as List<dynamic>? ?? [];
       final List<String> currentOccupiedSeats = currentOccupied.map((e) => e.toString()).toList();
