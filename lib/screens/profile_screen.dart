@@ -261,26 +261,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const Divider(height: 1),
                   ListTile(
-                    leading: const Icon(Icons.badge_outlined,
-                        color: Color(0xFF0F52BA)),
-                    title: const Text('Peran Aplikasi'),
-                    subtitle: const Text('Frontend Penumpang (K1 - Posman)'),
-                    trailing: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade100,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Text('K1',
-                          style: TextStyle(
-                              color: Color(0xFF0F52BA),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 12)),
-                    ),
-                  ),
-                  const Divider(height: 1),
-                  ListTile(
                     leading: const Icon(Icons.help_outline_rounded,
                         color: Colors.teal),
                     title: const Text('Bantuan & Tentang Aplikasi'),
