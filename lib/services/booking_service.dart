@@ -201,4 +201,124 @@ class BookingService {
 
     debugPrint('Booking $bookingId berhasil dibatalkan.');
   }
+
+  /// Watch incoming bookings for a specific driver.
+  static Stream<List<BookingModel>> watchDriverBookings(String driverId) {
+    if (driverId.isEmpty) {
+      return Stream.value([]);
+    }
+    return _firestore
+        .collection('bookings')
+        .where('driverId', isEqualTo: driverId)
+        .snapshots()
+        .map((snapshot) {
+      final bookings = snapshot.docs.map((doc) {
+        return BookingModel.fromMap(doc.data(), documentId: doc.id);
+      }).toList();
+
+      bookings.sort((a, b) => b.bookingDate.compareTo(a.bookingDate));
+      return bookings;
+    });
+  }
+
+  /// Confirm a passenger booking by driver.
+  static Future<void> confirmBooking(String bookingId) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('Sopir harus login terlebih dahulu.');
+    }
+
+    final bookingRef = _firestore.collection('bookings').doc(bookingId);
+
+    await _firestore.runTransaction((transaction) async {
+      final bookingSnapshot = await transaction.get(bookingRef);
+      if (!bookingSnapshot.exists) {
+        throw Exception('Pesanan tidak ditemukan.');
+      }
+
+      final bookingData = bookingSnapshot.data() ?? {};
+      final driverId = bookingData['driverId']?.toString() ?? '';
+      final status = bookingData['status']?.toString() ?? '';
+
+      if (driverId.isEmpty || driverId != currentUser.uid) {
+        throw Exception('Anda tidak memiliki akses ke pesanan ini.');
+      }
+
+      if (status != 'Menunggu Konfirmasi') {
+        throw Exception('Pesanan tidak dalam status Menunggu Konfirmasi.');
+      }
+
+      transaction.update(bookingRef, {
+        'status': 'Dikonfirmasi',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    });
+
+    debugPrint('Booking $bookingId berhasil dikonfirmasi.');
+  }
+
+  /// Reject a passenger booking by driver and release occupied seats.
+  static Future<void> rejectBooking(String bookingId) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('Sopir harus login terlebih dahulu.');
+    }
+
+    final bookingRef = _firestore.collection('bookings').doc(bookingId);
+
+    await _firestore.runTransaction((transaction) async {
+      final bookingSnapshot = await transaction.get(bookingRef);
+      if (!bookingSnapshot.exists) {
+        throw Exception('Pesanan tidak ditemukan.');
+      }
+
+      final bookingData = bookingSnapshot.data() ?? {};
+      final driverId = bookingData['driverId']?.toString() ?? '';
+      final status = bookingData['status']?.toString() ?? '';
+      final travelId = bookingData['travelId']?.toString() ?? '';
+      final List<dynamic> seatsToReleaseRaw =
+          bookingData['selectedSeats'] as List<dynamic>? ?? [];
+      final List<String> selectedSeats =
+          seatsToReleaseRaw.map((e) => e.toString()).toList();
+
+      if (driverId.isEmpty || driverId != currentUser.uid) {
+        throw Exception('Anda tidak memiliki akses ke pesanan ini.');
+      }
+
+      if (status != 'Menunggu Konfirmasi') {
+        throw Exception('Pesanan tidak dalam status Menunggu Konfirmasi.');
+      }
+
+      if (travelId.isEmpty) {
+        throw Exception('Travel ID tidak valid pada pesanan.');
+      }
+
+      final travelRef = _firestore.collection('travels').doc(travelId);
+      final travelSnapshot = await transaction.get(travelRef);
+
+      if (!travelSnapshot.exists) {
+        throw Exception('Jadwal travel tidak ditemukan.');
+      }
+
+      final travelData = travelSnapshot.data() ?? {};
+      final List<dynamic> currentOccupiedRaw =
+          travelData['occupiedSeats'] as List<dynamic>? ?? [];
+      final List<String> currentOccupied =
+          currentOccupiedRaw.map((e) => e.toString()).toList();
+
+      final updatedOccupied =
+          currentOccupied.where((seat) => !selectedSeats.contains(seat)).toList();
+
+      transaction.update(bookingRef, {
+        'status': 'Ditolak',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+
+      transaction.update(travelRef, {
+        'occupiedSeats': updatedOccupied,
+      });
+    });
+
+    debugPrint('Booking $bookingId berhasil ditolak dan kursi dilepas.');
+  }
 }

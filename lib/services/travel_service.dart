@@ -29,4 +29,33 @@ class TravelService {
       );
     }).toList();
   }
+
+  /// Watch travel schedules assigned to a specific driver.
+  static Stream<List<TravelModel>> watchDriverTravels(String driverId) {
+    if (driverId.isEmpty) {
+      return Stream.value([]);
+    }
+
+    return _firestore
+        .collection(_collectionPath)
+        .where('driverId', isEqualTo: driverId)
+        .snapshots()
+        .map((snapshot) {
+      final travels = snapshot.docs.map((doc) {
+        return TravelModel.fromMap(
+          doc.data(),
+          documentId: doc.id,
+        );
+      }).toList();
+
+      // Sort in-memory by departureDate, then departureTime
+      travels.sort((a, b) {
+        final dateCmp = a.departureDate.compareTo(b.departureDate);
+        if (dateCmp != 0) return dateCmp;
+        return a.departureTime.compareTo(b.departureTime);
+      });
+
+      return travels;
+    });
+  }
 }

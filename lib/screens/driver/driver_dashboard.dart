@@ -6,6 +6,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../services/location_service.dart';
 import '../../services/firebase_service.dart';
+import '../../services/booking_service.dart';
+import '../../services/travel_service.dart';
+import '../../models/booking_model.dart';
+import '../../models/travel_model.dart';
 
 class DriverDashboard extends StatefulWidget {
   const DriverDashboard({super.key});
@@ -18,6 +22,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
   bool isTripActive = false;
   Position? currentPosition;
   bool isLoadingLocation = false;
+  String? _processingBookingId;
 
   StreamSubscription<Position>? _positionSubscription;
 
@@ -83,10 +88,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
       return;
     }
 
-    // ==========================================
-    // JIKA PERJALANAN SEDANG AKTIF
-    // ==========================================
-
     if (isTripActive) {
       _stopLocationTracking();
 
@@ -120,17 +121,9 @@ class _DriverDashboardState extends State<DriverDashboard> {
       return;
     }
 
-    // ==========================================
-    // MULAI PROSES GPS
-    // ==========================================
-
     setState(() {
       isLoadingLocation = true;
     });
-
-    // ==========================================
-    // CEK GPS
-    // ==========================================
 
     final serviceEnabled = await LocationService.isLocationServiceEnabled();
 
@@ -149,15 +142,10 @@ class _DriverDashboardState extends State<DriverDashboard> {
         ),
       );
 
-      // Membuka pengaturan GPS perangkat
       await Geolocator.openLocationSettings();
 
       return;
     }
-
-    // ==========================================
-    // MINTA IZIN LOKASI
-    // ==========================================
 
     final permission = await LocationService.requestPermission();
 
@@ -180,10 +168,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
       return;
     }
 
-    // ==========================================
-    // AMBIL LOKASI
-    // ==========================================
-
     final position = await LocationService.getCurrentLocation();
     await LocationService.getCurrentLocation();
 
@@ -204,10 +188,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
 
       return;
     }
-
-    // ==========================================
-    // GPS BERHASIL
-    // ==========================================
 
     setState(() {
       isTripActive = true;
@@ -233,6 +213,776 @@ class _DriverDashboardState extends State<DriverDashboard> {
         content: Text(
           'GPS aktif. Perjalanan dimulai.',
         ),
+      ),
+    );
+  }
+
+  Future<void> _confirmBooking(String bookingId) async {
+    setState(() {
+      _processingBookingId = bookingId;
+    });
+
+    try {
+      await BookingService.confirmBooking(bookingId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pesanan berhasil dikonfirmasi.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Gagal mengkonfirmasi pesanan: ${e.toString().replaceAll('Exception: ', '')}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _processingBookingId = null;
+        });
+      }
+    }
+  }
+
+  Future<void> _rejectBooking(String bookingId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Tolak Pesanan'),
+        content: const Text(
+          'Apakah Anda yakin ingin menolak pesanan ini? Kursi penumpang akan dilepas kembali.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Tolak'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _processingBookingId = bookingId;
+    });
+
+    try {
+      await BookingService.rejectBooking(bookingId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Pesanan ditolak dan kursi telah dilepas.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Gagal menolak pesanan: ${e.toString().replaceAll('Exception: ', '')}',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _processingBookingId = null;
+        });
+      }
+    }
+  }
+
+  Widget _buildIncomingBookingsSection() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null || currentUser.uid.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Text(
+          'Sesi driver belum aktif.',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'PESANAN MASUK',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<List<BookingModel>>(
+          stream: BookingService.watchDriverBookings(currentUser.uid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Text(
+                  'Gagal memuat pesanan: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.red),
+                ),
+              );
+            }
+
+            final bookings = snapshot.data ?? [];
+
+            if (bookings.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Belum ada pesanan masuk',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: bookings.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final booking = bookings[index];
+                return _buildBookingCard(booking);
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBookingCard(BookingModel booking) {
+    final isProcessing = _processingBookingId == booking.bookingId;
+    final travel = booking.travel;
+    final isPending = booking.status == 'Menunggu Konfirmasi';
+
+    Color statusColor;
+    switch (booking.status) {
+      case 'Dikonfirmasi':
+        statusColor = Colors.green;
+        break;
+      case 'Ditolak':
+      case 'Dibatalkan':
+        statusColor = Colors.red;
+        break;
+      default:
+        statusColor = Colors.orange;
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                booking.bookingId,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Color(0xFF0F52BA),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  booking.status,
+                  style: TextStyle(
+                    color: statusColor,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const Divider(height: 20),
+          Row(
+            children: [
+              const Icon(Icons.person, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                booking.passengerName,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              const Spacer(),
+              const Icon(Icons.phone, size: 16, color: Colors.grey),
+              const SizedBox(width: 4),
+              Text(
+                booking.passengerPhone,
+                style: const TextStyle(color: Colors.grey, fontSize: 13),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              const Icon(Icons.route, size: 18, color: Colors.grey),
+              const SizedBox(width: 8),
+              Text(
+                '${travel.origin} → ${travel.destination}',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+            ],
+          ),
+          if (travel.departureDate.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                const SizedBox(width: 8),
+                Text(
+                  travel.departureDate,
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+                const SizedBox(width: 16),
+                const Icon(Icons.access_time, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
+                Text(
+                  travel.departureTime,
+                  style: const TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Kursi: ${booking.selectedSeats.join(", ")}',
+                style: const TextStyle(fontSize: 13, color: Colors.black87),
+              ),
+              Text(
+                'Layanan: ${booking.serviceType}',
+                style: const TextStyle(fontSize: 13, color: Colors.grey),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Total: Rp ${booking.totalPrice}',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+              color: Colors.green,
+            ),
+          ),
+          if (isPending) ...[
+            const SizedBox(height: 14),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: isProcessing
+                        ? null
+                        : () => _rejectBooking(booking.bookingId),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red,
+                      side: const BorderSide(color: Colors.red),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: isProcessing
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.red,
+                            ),
+                          )
+                        : const Text('TOLAK'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: isProcessing
+                        ? null
+                        : () => _confirmBooking(booking.bookingId),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: isProcessing
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text('KONFIRMASI'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDriverScheduleSection() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null || currentUser.uid.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: const Text(
+          'Driver belum login.',
+          style: TextStyle(color: Colors.grey),
+        ),
+      );
+    }
+
+    final now = DateTime.now();
+    final today =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Perjalanan Hari Ini',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        StreamBuilder<List<TravelModel>>(
+          stream: TravelService.watchDriverTravels(currentUser.uid),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(20),
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Text(
+                  'Gagal memuat jadwal perjalanan',
+                  style: TextStyle(color: Colors.red),
+                ),
+              );
+            }
+
+            final allTravels = snapshot.data ?? [];
+            final todayTravels = allTravels.where((t) {
+              if (t.departureDate.isEmpty) return true;
+              return t.departureDate == today;
+            }).toList();
+
+            if (todayTravels.isEmpty) {
+              return Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Belum ada jadwal perjalanan hari ini.',
+                    style: TextStyle(
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: todayTravels.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final travel = todayTravels[index];
+                return _buildScheduleCard(travel);
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScheduleCard(TravelModel travel) {
+    Widget infoItem({
+      required IconData icon,
+      required String label,
+      required String value,
+    }) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: const Color(0xFFE8F0FE),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              icon,
+              size: 19,
+              color: const Color(0xFF0F52BA),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  value,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF1A1A1A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    final vehicleName = travel.vehicleType.isNotEmpty
+        ? travel.vehicleType
+        : 'Kendaraan belum tersedia';
+
+    final plateNumber =
+        travel.plateNumber.isNotEmpty ? travel.plateNumber : '-';
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F0FE),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.route_rounded,
+                  color: Color(0xFF0F52BA),
+                  size: 25,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${travel.origin} → ${travel.destination}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                        color: Color(0xFF1A1A1A),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      travel.providerName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    if (travel.serviceType.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 9,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEAF7F5),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          travel.serviceType,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF009688),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Divider(
+            height: 1,
+            color: Colors.grey.shade200,
+          ),
+          const SizedBox(height: 18),
+          Row(
+            children: [
+              Expanded(
+                child: infoItem(
+                  icon: Icons.access_time_rounded,
+                  label: 'Jam Berangkat',
+                  value: travel.departureTime.isNotEmpty
+                      ? travel.departureTime
+                      : '-',
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: infoItem(
+                  icon: Icons.schedule_rounded,
+                  label: 'Estimasi Tiba',
+                  value: travel.arrivalTime.isNotEmpty
+                      ? travel.arrivalTime
+                      : '-',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          infoItem(
+            icon: Icons.calendar_month_rounded,
+            label: 'Tanggal Perjalanan',
+            value: travel.departureDate.isNotEmpty
+                ? travel.departureDate
+                : '-',
+          ),
+          const SizedBox(height: 18),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8F0FE),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.directions_bus_rounded,
+                  size: 19,
+                  color: Color(0xFF0F52BA),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Kendaraan',
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      vehicleName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      plateNumber,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF7F9FC),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              children: [
+                const Icon(
+                  Icons.event_seat_rounded,
+                  size: 19,
+                  color: Color(0xFF0F52BA),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Kursi Terisi',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  '${travel.occupiedSeats.length} / ${travel.totalSeats}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0F52BA),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -273,9 +1023,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // =========================
-            // SAPAAN
-            // =========================
             const Text(
               'Halo, Sopir! 👋',
               style: TextStyle(
@@ -284,9 +1031,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 color: Color(0xFF1A1A1A),
               ),
             ),
-
             const SizedBox(height: 6),
-
             const Text(
               'Siap untuk perjalanan hari ini?',
               style: TextStyle(
@@ -294,12 +1039,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 color: Colors.grey,
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // =========================
-            // STATUS PERJALANAN
-            // =========================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -375,103 +1115,11 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // =========================
-            // JUDUL PERJALANAN
-            // =========================
-            const Text(
-              'Perjalanan Hari Ini',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // =========================
-            // INFO RUTE
-            // =========================
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE8F0FE),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(
-                          Icons.route,
-                          color: Color(0xFF0F52BA),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      const Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Jakarta → Bandung',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(
-                              'Perjalanan Antar Kota',
-                              style: TextStyle(
-                                color: Colors.grey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _infoItem(
-                        Icons.access_time,
-                        'Jam Berangkat',
-                        '08:00',
-                      ),
-                      _infoItem(
-                        Icons.directions_car,
-                        'Kendaraan',
-                        'B 1234 XYZ',
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
+            _buildIncomingBookingsSection(),
             const SizedBox(height: 20),
-
-            // =========================
-            // PETA
-            // =========================
+            _buildDriverScheduleSection(),
+            const SizedBox(height: 20),
             const Text(
               'Lokasi Travel',
               style: TextStyle(
@@ -479,9 +1127,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 12),
-
             Container(
               width: double.infinity,
               height: 220,
@@ -510,12 +1156,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
-            // =========================
-            // STATISTIK
-            // =========================
             Row(
               children: [
                 Expanded(
@@ -535,12 +1176,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 ),
               ],
             ),
-
             const SizedBox(height: 20),
-
-            // =========================
-            // STATUS GPS
-            // =========================
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(18),
@@ -583,7 +1219,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 ],
               ),
             ),
-
             const SizedBox(height: 30),
           ],
         ),
@@ -591,48 +1226,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
     );
   }
 
-  // =========================
-  // INFO ITEM
-  // =========================
-  Widget _infoItem(
-    IconData icon,
-    String title,
-    String value,
-  ) {
-    return Row(
-      children: [
-        Icon(
-          icon,
-          size: 20,
-          color: const Color(0xFF0F52BA),
-        ),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 3),
-            Text(
-              value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  // =========================
-  // STAT CARD
-  // =========================
   Widget _statCard({
     required IconData icon,
     required String title,
