@@ -146,6 +146,30 @@ class BookingService {
     }
   }
 
+  /// Watch all bookings created by a specific passenger in real-time.
+  static Stream<List<BookingModel>> watchUserBookings(String userId) {
+    return _firestore
+        .collection('bookings')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+      final bookings = snapshot.docs.map((doc) {
+        return BookingModel.fromMap(
+          doc.data(),
+          documentId: doc.id,
+        );
+      }).toList();
+
+      // Sort in memory so no composite index is required.
+      bookings.sort(
+        (a, b) => b.bookingDate.compareTo(a.bookingDate),
+      );
+
+      return bookings;
+    });
+  }
+
+
   /// Cancel a booking using Firestore Transaction.
   static Future<void> cancelBooking(String bookingId) async {
     final currentUser = _auth.currentUser;

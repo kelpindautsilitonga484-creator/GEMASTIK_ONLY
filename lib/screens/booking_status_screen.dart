@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../models/booking_model.dart';
 import '../services/booking_service.dart';
+import 'passenger/passenger_tracking_screen.dart';
 
 class BookingStatusScreen extends StatefulWidget {
   const BookingStatusScreen({super.key});
@@ -13,14 +14,15 @@ class BookingStatusScreen extends StatefulWidget {
 class _BookingStatusScreenState extends State<BookingStatusScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  late Future<List<BookingModel>> _bookingsFuture;
   String? _cancellingBookingId;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-    _bookingsFuture = _fetchBookings();
+    _tabController = TabController(
+      length: 2,
+      vsync: this,
+    );
   }
 
   @override
@@ -29,19 +31,9 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
     super.dispose();
   }
 
-  Future<List<BookingModel>> _fetchBookings() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return [];
-    return BookingService.getUserBookings(user.uid);
-  }
-
-  void _reloadBookings() {
-    if (!mounted) return;
-    setState(() {
-      _bookingsFuture = _fetchBookings();
-    });
-  }
-
+  // =========================
+  // E-TICKET
+  // =========================
   void _showETicketDialog(BookingModel booking) {
     showModalBottomSheet(
       context: context,
@@ -51,134 +43,42 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
     );
   }
 
+  // =========================
+  // LIVE TRACKING
+  // =========================
   void _showLiveTrackingModal(BookingModel booking) {
-    final travel = booking.travel;
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: const [
-            Icon(Icons.g_mobiledata_rounded, color: Colors.teal, size: 28),
-            Icon(Icons.location_on_rounded, color: Colors.redAccent, size: 24),
-            SizedBox(width: 8),
-            Text('Lacak Lokasi Travel (GPS)',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(travel.providerName,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.bold, fontSize: 14)),
-                  Text('${travel.vehicleType} • ${travel.plateNumber}',
-                      style: TextStyle(
-                          fontSize: 12, color: Colors.grey.shade700)),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.person_pin_rounded,
-                          color: Color(0xFF0F52BA), size: 16),
-                      const SizedBox(width: 4),
-                      Text('Pengemudi: ${travel.driverName}',
-                          style: const TextStyle(
-                              fontSize: 12, fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text('Status Posisi Terkini:',
-                style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold)),
-            const SizedBox(height: 6),
-            Row(
-              children: const [
-                Icon(Icons.directions_bus_filled_rounded,
-                    color: Colors.teal, size: 20),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Jalan Medan - Tebing Tinggi (Km 34)',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 13,
-                        color: Color(0xFF0F172A)),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Estimasi waktu penjemputan: 15 - 20 Menit Lagi',
-              style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.teal.shade800,
-                  fontWeight: FontWeight.w600),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              height: 120,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade200,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(Icons.map_rounded,
-                            size: 40, color: Colors.black38),
-                        SizedBox(height: 4),
-                        Text('Peta GPS Berjalan (Simulasi Live)',
-                            style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.black54,
-                                fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                  ),
-                  Positioned(
-                    top: 20,
-                    left: 40,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: const BoxDecoration(
-                          color: Colors.teal, shape: BoxShape.circle),
-                      child: const Icon(Icons.directions_bus,
-                          color: Colors.white, size: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Tutup',
-                style: TextStyle(fontWeight: FontWeight.bold)),
+    final driverId = booking.driverId?.trim();
+
+    if (driverId == null || driverId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Driver belum ditugaskan untuk perjalanan ini.',
           ),
-        ],
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    if (booking.travelId.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'ID perjalanan tidak valid.',
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => PassengerTrackingScreen(
+          driverId: driverId,
+          travelId: booking.travelId,
+        ),
       ),
     );
   }
@@ -230,20 +130,26 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Pemesanan tiket berhasil dibatalkan.'),
+          content: Text(
+            'Pemesanan tiket berhasil dibatalkan.',
+          ),
           backgroundColor: Colors.redAccent,
         ),
       );
 
-      _reloadBookings();
+      // Tidak perlu _reloadBookings().
+      // StreamBuilder akan memperbarui data otomatis.
     } catch (e) {
       if (!mounted) return;
 
       final errorMessage = e.toString().replaceAll('Exception: ', '');
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Gagal membatalkan pesanan: $errorMessage'),
-          backgroundColor: Colors.red.shade800,
+          content: Text(
+            'Gagal membatalkan pesanan: $errorMessage',
+          ),
+          backgroundColor: Colors.red,
         ),
       );
     } finally {
@@ -340,8 +246,12 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Status Pemesanan & Tiket',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Status Pemesanan & Tiket',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         backgroundColor: const Color(0xFF0F52BA),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -351,78 +261,119 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
           indicatorWeight: 3,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white60,
-          labelStyle:
-              const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
           tabs: const [
             Tab(text: 'Tiket Aktif'),
             Tab(text: 'Riwayat Pemesanan'),
           ],
         ),
       ),
-      body: FutureBuilder<List<BookingModel>>(
-        future: _bookingsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      body: Builder(
+        builder: (context) {
+          final user = FirebaseAuth.instance.currentUser;
 
-          if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline_rounded,
-                      size: 64, color: Colors.redAccent),
-                  const SizedBox(height: 12),
-                  const Text(
-                    'Gagal memuat tiket',
-                    style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.redAccent),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Periksa koneksi internet Anda.',
-                    style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton.icon(
-                    onPressed: _reloadBookings,
-                    icon: const Icon(Icons.refresh_rounded),
-                    label: const Text('Coba Lagi'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0F52BA),
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ],
+          if (user == null) {
+            return const Center(
+              child: Text(
+                'Silakan login untuk melihat tiket.',
               ),
             );
           }
 
-          final allBookings = snapshot.data ?? [];
+          return StreamBuilder<List<BookingModel>>(
+            stream: BookingService.watchUserBookings(
+              user.uid,
+            ),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(
+                  child: CircularProgressIndicator(),
+                );
+              }
 
-          final activeBookings = allBookings
-              .where((b) =>
-                  b.status == 'Dikonfirmasi' ||
-                  b.status == 'Menunggu Pembayaran' ||
-                  b.status == 'Menunggu Konfirmasi')
-              .toList();
+              if (snapshot.hasError) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline_rounded,
+                        size: 64,
+                        color: Colors.redAccent,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Gagal memuat tiket',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.redAccent,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Periksa koneksi internet Anda.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {});
+                        },
+                        icon: const Icon(
+                          Icons.refresh_rounded,
+                        ),
+                        label: const Text('Coba Lagi'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF0F52BA),
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
 
-          final historyBookings = allBookings
-              .where((b) =>
-                  b.status == 'Selesai' ||
-                  b.status == 'Dibatalkan' ||
-                  b.status == 'Ditolak')
-              .toList();
+              final allBookings = snapshot.data ?? [];
 
-          return TabBarView(
-            controller: _tabController,
-            children: [
-              _buildBookingList(activeBookings, isActiveTab: true),
-              _buildBookingList(historyBookings, isActiveTab: false),
-            ],
+              final activeBookings = allBookings
+                  .where(
+                    (booking) =>
+                        booking.status == 'Dikonfirmasi' ||
+                        booking.status == 'Menunggu Pembayaran' ||
+                        booking.status == 'Menunggu Konfirmasi',
+                  )
+                  .toList();
+
+              final historyBookings = allBookings
+                  .where(
+                    (booking) =>
+                        booking.status == 'Selesai' ||
+                        booking.status == 'Dibatalkan' ||
+                        booking.status == 'Ditolak',
+                  )
+                  .toList();
+
+              return TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildBookingList(
+                    activeBookings,
+                    isActiveTab: true,
+                  ),
+                  _buildBookingList(
+                    historyBookings,
+                    isActiveTab: false,
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
@@ -494,8 +445,7 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
       statusTextColor = Colors.redAccent;
     }
 
-    final bool isCancellingThis =
-        _cancellingBookingId == booking.bookingId;
+    final bool isCancellingThis = _cancellingBookingId == booking.bookingId;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -523,44 +473,42 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
                         ),
                         const SizedBox(width: 6),
                         Expanded(
-                      child: Text(
-                        booking.bookingId,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                          color: Color(0xFF0F172A),
+                          child: Text(
+                            booking.bookingId,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              color: Color(0xFF0F172A),
+                            ),
+                          ),
                         ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusBgColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      booking.status,
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: statusTextColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 11,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-
-    const SizedBox(width: 8),
-
-    Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
-      decoration: BoxDecoration(
-        color: statusBgColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        booking.status,
-        maxLines: 1,
-        style: TextStyle(
-          color: statusTextColor,
-          fontWeight: FontWeight.bold,
-          fontSize: 11,
-        ),
-      ),
-    ),
-  ],
-),
               const Divider(height: 20),
 
               // Operator & Time
@@ -650,16 +598,13 @@ class _BookingStatusScreenState extends State<BookingStatusScreen>
                                 width: 20,
                                 height: 20,
                                 child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.redAccent),
+                                    strokeWidth: 2, color: Colors.redAccent),
                               )
                             : TextButton(
-                                onPressed: () =>
-                                    _confirmCancelBooking(booking),
+                                onPressed: () => _confirmCancelBooking(booking),
                                 child: const Text('Batalkan',
                                     style: TextStyle(
-                                        color: Colors.redAccent,
-                                        fontSize: 12)),
+                                        color: Colors.redAccent, fontSize: 12)),
                               ),
                       ],
                     ),

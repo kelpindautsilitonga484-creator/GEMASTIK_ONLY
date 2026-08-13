@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import '../login_screen.dart';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,6 +13,9 @@ import '../../services/travel_service.dart';
 import '../../models/booking_model.dart';
 import '../../models/travel_model.dart';
 
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
+
 class DriverDashboard extends StatefulWidget {
   const DriverDashboard({super.key});
 
@@ -19,6 +24,7 @@ class DriverDashboard extends StatefulWidget {
 }
 
 class _DriverDashboardState extends State<DriverDashboard> {
+  TravelModel? _activeTravel;
   bool isTripActive = false;
   Position? currentPosition;
   bool isLoadingLocation = false;
@@ -26,7 +32,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
 
   StreamSubscription<Position>? _positionSubscription;
 
-  void _startLocationTracking(String driverId) {
+  void _startLocationTracking(String driverId, String travelId) {
     _positionSubscription?.cancel();
 
     _positionSubscription = LocationService.getLocationStream().listen(
@@ -40,7 +46,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
         try {
           await FirebaseService.updateDriverLocation(
             driverId: driverId,
-            vehicleId: 'TT-001',
+            travelId: travelId,
             position: position,
             isActive: true,
           );
@@ -64,7 +70,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
     _positionSubscription = null;
   }
 
-  Future<void> _toggleTrip() async {
+  Future<void> _toggleTrip(TravelModel travel) async {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
@@ -72,6 +78,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
         _stopLocationTracking();
         setState(() {
           isTripActive = false;
+          _activeTravel = null;
         });
       }
 
@@ -89,17 +96,31 @@ class _DriverDashboardState extends State<DriverDashboard> {
     }
 
     if (isTripActive) {
+      if (_activeTravel?.id != travel.id) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Selesaikan perjalanan yang sedang aktif terlebih dahulu.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
       _stopLocationTracking();
 
+      final currentActiveTravel = _activeTravel;
       setState(() {
         isTripActive = false;
+        _activeTravel = null;
       });
 
-      if (currentPosition != null) {
+      if (currentPosition != null && currentActiveTravel != null) {
         try {
           await FirebaseService.updateDriverLocation(
             driverId: user.uid,
-            vehicleId: 'TT-001',
+            travelId: currentActiveTravel.id,
             position: currentPosition!,
             isActive: false,
           );
@@ -118,6 +139,16 @@ class _DriverDashboardState extends State<DriverDashboard> {
         ),
       );
 
+      return;
+    }
+
+    if (travel.id.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('ID Perjalanan tidak valid.'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
@@ -169,7 +200,6 @@ class _DriverDashboardState extends State<DriverDashboard> {
     }
 
     final position = await LocationService.getCurrentLocation();
-    await LocationService.getCurrentLocation();
 
     if (!mounted) return;
 
@@ -190,23 +220,24 @@ class _DriverDashboardState extends State<DriverDashboard> {
     }
 
     setState(() {
+      _activeTravel = travel;
       isTripActive = true;
       currentPosition = position;
       isLoadingLocation = false;
     });
 
-    _startLocationTracking(user.uid);
-
     try {
       await FirebaseService.updateDriverLocation(
         driverId: user.uid,
-        vehicleId: 'TT-001',
+        travelId: travel.id,
         position: position,
         isActive: true,
       );
     } catch (e) {
       debugPrint('Gagal mengirim lokasi ke Firebase: $e');
     }
+
+    _startLocationTracking(user.uid, travel.id);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -453,7 +484,8 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: statusColor.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(20),
@@ -769,6 +801,9 @@ class _DriverDashboardState extends State<DriverDashboard> {
     final plateNumber =
         travel.plateNumber.isNotEmpty ? travel.plateNumber : '-';
 
+    final isThisTripActive = isTripActive && _activeTravel?.id == travel.id;
+    final isAnotherTripActive = isTripActive && _activeTravel?.id != travel.id;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -876,9 +911,8 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 child: infoItem(
                   icon: Icons.schedule_rounded,
                   label: 'Estimasi Tiba',
-                  value: travel.arrivalTime.isNotEmpty
-                      ? travel.arrivalTime
-                      : '-',
+                  value:
+                      travel.arrivalTime.isNotEmpty ? travel.arrivalTime : '-',
                 ),
               ),
             ],
@@ -887,9 +921,7 @@ class _DriverDashboardState extends State<DriverDashboard> {
           infoItem(
             icon: Icons.calendar_month_rounded,
             label: 'Tanggal Perjalanan',
-            value: travel.departureDate.isNotEmpty
-                ? travel.departureDate
-                : '-',
+            value: travel.departureDate.isNotEmpty ? travel.departureDate : '-',
           ),
           const SizedBox(height: 18),
           Row(
@@ -982,8 +1014,119 @@ class _DriverDashboardState extends State<DriverDashboard> {
               ],
             ),
           ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            height: 46,
+            child: ElevatedButton.icon(
+              onPressed: isLoadingLocation
+                  ? null
+                  : () {
+                      if (isAnotherTripActive) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Selesaikan perjalanan yang sedang aktif terlebih dahulu.',
+                            ),
+                            backgroundColor: Colors.orange,
+                          ),
+                        );
+                      } else {
+                        _toggleTrip(travel);
+                      }
+                    },
+              icon: Icon(
+                isThisTripActive
+                    ? Icons.stop_circle_outlined
+                    : Icons.play_circle_outline,
+              ),
+              label: isLoadingLocation && (isThisTripActive || !isTripActive)
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text(
+                      isThisTripActive
+                          ? 'AKHIRI PERJALANAN'
+                          : 'MULAI PERJALANAN',
+                    ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isThisTripActive
+                    ? Colors.red
+                    : (isAnotherTripActive
+                        ? Colors.grey
+                        : const Color(0xFF0F52BA)),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  @override
+  Future<void> _logoutDriver() async {
+    if (isTripActive) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Akhiri perjalanan terlebih dahulu sebelum keluar.',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Keluar dari akun?'),
+          content: const Text(
+            'Apakah Anda yakin ingin keluar dari akun driver?',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(false);
+              },
+              child: const Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop(true);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Keluar'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLogout != true) return;
+
+    await FirebaseAuth.instance.signOut();
+
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(
+        builder: (_) => const LoginScreen(),
+      ),
+      (route) => false,
     );
   }
 
@@ -1009,12 +1152,9 @@ class _DriverDashboardState extends State<DriverDashboard> {
         ),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.notifications_none),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.person_outline),
+            onPressed: _logoutDriver,
+            icon: const Icon(Icons.logout_rounded),
+            tooltip: 'Keluar',
           ),
         ],
       ),
@@ -1077,49 +1217,73 @@ class _DriverDashboardState extends State<DriverDashboard> {
                         ),
                       ),
                       const SizedBox(width: 10),
-                      Text(
-                        isTripActive
-                            ? 'Perjalanan sedang berlangsung'
-                            : 'Perjalanan belum dimulai',
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+                      Expanded(
+                        child: Text(
+                          isTripActive
+                              ? 'Perjalanan sedang berlangsung'
+                              : 'Perjalanan belum dimulai',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 18),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton.icon(
-                      onPressed: _toggleTrip,
-                      icon: Icon(
-                        isTripActive
-                            ? Icons.stop_circle_outlined
-                            : Icons.play_circle_outline,
-                      ),
-                      label: Text(
-                        isTripActive ? 'AKHIRI PERJALANAN' : 'MULAI PERJALANAN',
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            isTripActive ? Colors.red : const Color(0xFF0F52BA),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 6),
+                  Text(
+                    isTripActive && _activeTravel != null
+                        ? '${_activeTravel!.origin} → ${_activeTravel!.destination} (${_activeTravel!.departureTime})'
+                        : 'Pilih jadwal perjalanan di bawah untuk memulai.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  if (isTripActive && _activeTravel != null) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 46,
+                      child: ElevatedButton.icon(
+                        onPressed: isLoadingLocation
+                            ? null
+                            : () => _toggleTrip(_activeTravel!),
+                        icon: const Icon(Icons.stop_circle_outlined),
+                        label: const Text('AKHIRI PERJALANAN'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                         ),
                       ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
+
             const SizedBox(height: 20),
+
+            // =========================
+            // PESANAN MASUK
+            // =========================
             _buildIncomingBookingsSection(),
+
             const SizedBox(height: 20),
+
+            // =========================
+            // PERJALANAN HARI INI
+            // =========================
             _buildDriverScheduleSection(),
+
             const SizedBox(height: 20),
+
+            // =========================
+            // LOKASI TRAVEL
+            // =========================
             const Text(
               'Lokasi Travel',
               style: TextStyle(
@@ -1127,34 +1291,93 @@ class _DriverDashboardState extends State<DriverDashboard> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+
             const SizedBox(height: 12),
+
             Container(
               width: double.infinity,
-              height: 220,
+              height: 260,
+              clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
-                color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(18),
               ),
-              child: const Stack(
-                alignment: Alignment.center,
-                children: [
-                  Icon(
-                    Icons.map_outlined,
-                    size: 70,
-                    color: Colors.grey,
-                  ),
-                  Positioned(
-                    bottom: 20,
-                    child: Text(
-                      'Google Maps akan ditampilkan di sini',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w500,
+              child: currentPosition == null
+                  ? Container(
+                      color: Colors.grey.shade200,
+                      alignment: Alignment.center,
+                      child: const Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.location_off_outlined,
+                            size: 48,
+                            color: Colors.grey,
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'Lokasi driver belum tersedia',
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
+                    )
+                  : FlutterMap(
+                      options: MapOptions(
+                        initialCenter: LatLng(
+                          currentPosition!.latitude,
+                          currentPosition!.longitude,
+                        ),
+                        initialZoom: 16,
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                          userAgentPackageName: 'com.example.app_gemastik',
+                        ),
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: LatLng(
+                                currentPosition!.latitude,
+                                currentPosition!.longitude,
+                              ),
+                              width: 50,
+                              height: 50,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF0F52BA),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3,
+                                  ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black26,
+                                      blurRadius: 8,
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.directions_bus_rounded,
+                                  color: Colors.white,
+                                  size: 26,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SimpleAttributionWidget(
+                          source: Text(
+                            '© OpenStreetMap contributors',
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
-              ),
             ),
             const SizedBox(height: 20),
             Row(

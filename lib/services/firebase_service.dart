@@ -6,17 +6,18 @@ class FirebaseService {
 
   static Future<void> updateDriverLocation({
     required String driverId,
-    required String vehicleId,
+    required String travelId,
     required Position position,
     required bool isActive,
   }) async {
     await _firestore.collection('travel_locations').doc(driverId).set({
       'driverId': driverId,
-      'vehicleId': vehicleId,
+      'travelId': travelId,
       'latitude': position.latitude,
       'longitude': position.longitude,
       'speed': position.speed,
       'heading': position.heading,
+      'isActive': isActive,
       'status': isActive ? 'active' : 'inactive',
       'updatedAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));

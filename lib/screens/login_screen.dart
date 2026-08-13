@@ -191,32 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 6),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: Colors.blue.shade50,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: Colors.blue.shade200),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: const [
-                      Icon(Icons.person_rounded,
-                          size: 14, color: Color(0xFF0F52BA)),
-                      SizedBox(width: 4),
-                      Text(
-                        'Portal Penumpang (Posman - K1)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF0F52BA),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+
                 const SizedBox(height: 32),
 
                 // Card Form
@@ -356,7 +331,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                       ),
                                     )
                                   : const Text(
-                                      'MASUK SEBAGAI PENUMPANG',
+                                      'LOGIN',
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
