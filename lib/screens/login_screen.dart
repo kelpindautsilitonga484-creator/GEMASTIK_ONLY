@@ -230,6 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
+                            maxLength: 254,
                             decoration: InputDecoration(
                               labelText: 'Email / Username',
                               hintText: 'contoh@email.com',
@@ -253,6 +254,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _isPasswordObscured,
+                            maxLength: 20,
                             decoration: InputDecoration(
                               labelText: 'Kata Sandi',
                               prefixIcon:
@@ -278,6 +280,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             validator: (value) {
                               if (value == null || value.isEmpty) {
                                 return 'Kata sandi tidak boleh kosong';
+                              }
+                              if (value.length < 6) {
+                                return 'Kata sandi harus memiliki minimal 6 karakter';
                               }
                               return null;
                             },
