@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -20,7 +21,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isPasswordObscured = true;
   bool _isConfirmPasswordObscured = true;
   bool _isLoading = false;
-  
+
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -256,6 +257,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           TextFormField(
                             controller: _nameController,
                             textCapitalization: TextCapitalization.words,
+                            maxLength: 50,
                             decoration: InputDecoration(
                               labelText: 'Nama Lengkap',
                               hintText: 'Masukkan nama lengkap',
@@ -279,6 +281,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           TextFormField(
                             controller: _emailController,
                             keyboardType: TextInputType.emailAddress,
+                            maxLength: 254,
                             decoration: InputDecoration(
                               labelText: 'Email',
                               hintText: 'contoh@email.com',
@@ -307,6 +310,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           TextFormField(
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
+                            maxLength: 13,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                             decoration: InputDecoration(
                               labelText: 'Nomor Telepon',
                               hintText: '081234567890',
@@ -339,6 +346,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _isPasswordObscured,
+                            maxLength: 20,
                             decoration: InputDecoration(
                               labelText: 'Kata Sandi',
                               prefixIcon:
@@ -377,6 +385,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           TextFormField(
                             controller: _confirmPasswordController,
                             obscureText: _isConfirmPasswordObscured,
+                            maxLength: 20,
                             decoration: InputDecoration(
                               labelText: 'Konfirmasi Kata Sandi',
                               prefixIcon: const Icon(Icons.lock_reset_outlined),
