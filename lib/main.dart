@@ -20,7 +20,7 @@ class TravelTrackApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TravelTrack - Penumpang (K1)',
+      title: 'TravelTrack',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
